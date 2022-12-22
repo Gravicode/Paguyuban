@@ -147,7 +147,7 @@ namespace Paguyuban.Data
         public Roles GetUserRole(string Email)
         {
             var selItem = db.Where(x => x.Username == Email).FirstOrDefault();
-            return selItem.Role;
+            return selItem == null ? Roles.Unknown : selItem.Role;
         }
 
         public void RefreshEntity(UserProfile user)

@@ -368,13 +368,13 @@ namespace Paguyuban.Models
         [Indexed(Sortable = true)]
         public string? LinkedIn { set; get; }
         [Indexed(Sortable = true)]
-        public bool ViewProfilePic { set; get; }
+        public string ViewProfilePic { set; get; }
         [Indexed(Sortable = true)]
-        public bool ViewLastSeen { set; get; }
+        public string ViewLastSeen { set; get; }
         [Indexed(Sortable = true)]
-        public bool AddToGroup { set; get; }
+        public string AddToGroup { set; get; }
         [Indexed(Sortable = true)]
-        public bool ViewStatus { set; get; }
+        public string ViewStatus { set; get; }
         [Indexed(Sortable = true)]
         public bool ReadReceipt { set; get; }
         [Indexed(Sortable = true)]
@@ -384,7 +384,11 @@ namespace Paguyuban.Models
         [Indexed(Sortable = true)]
         public bool ScreenLock { set; get; }
         [Indexed(Sortable = true)]
-        public bool AutoDownload { set; get; }
+        public bool AutoDownload { set; get; }   
+        [Indexed(Sortable = true)]
+        public bool TwoFactor { set; get; }  
+        [Indexed(Sortable = true)]
+        public bool AlertIntruder { set; get; }
 
 
         //[InverseProperty(nameof(MessageHeader.User))]
@@ -406,7 +410,7 @@ namespace Paguyuban.Models
 
 
 
-    public enum Roles { Admin, User, Pengurus }
+    public enum Roles { Admin, User, Pengurus, Unknown }
 
 
 }

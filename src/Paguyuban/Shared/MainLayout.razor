@@ -702,7 +702,7 @@
         //NavMgr.NavigateTo($"/login");
     }
 
-
+    UserProfile selUser;
     string Nama = "Saya";
     protected override async Task OnInitializedAsync()
     {
@@ -713,7 +713,8 @@
         if (user.Identity.IsAuthenticated)
         {
             var UserName = user.Identity.Name;
-            Nama = Userservice.GetUserByEmail(UserName)?.FullName;
+            selUser = Userservice.GetUserByEmail(UserName);
+            Nama = selUser?.FullName;
         }
     }
 
