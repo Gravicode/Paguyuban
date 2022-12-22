@@ -13,7 +13,7 @@ namespace Paguyuban.Data
 
         List<T> FindByKeyword(string Keyword);
         T GetDataById(object Id);
-        bool DeleteData(object Id);
+        bool DeleteData(T Id);
         long GetLastId();
     }
 }

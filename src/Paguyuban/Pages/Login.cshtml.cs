@@ -6,18 +6,25 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Paguyuban.Data;
 using Paguyuban.Tools;
+using Redis.OM;
+using Microsoft.AspNetCore.Components;
 
 namespace Paguyuban.Pages
 {
     [AllowAnonymous]
     public class LoginModel : PageModel
     {
-        PaguyubanDB db { set; get; }
+        public RedisConnectionProvider provider { get; set; }
+        public LoginModel(RedisConnectionProvider provider)
+        {
+            this.provider = provider;
+        }
         public string ReturnUrl { get; set; }
         public async Task<IActionResult>
             OnGetAsync(string paramUsername, string paramPassword)
         {
-            if (db == null) db = new PaguyubanDB();
+
+            var db = new UserProfileService(provider);
             string returnUrl = Url.Content("~/");
             try
             {
@@ -27,14 +34,7 @@ namespace Paguyuban.Pages
                     CookieAuthenticationDefaults.AuthenticationScheme);
             }
             catch { }
-            bool isAuthenticate = false;
-            var usr = db.UserProfiles.Where(x => x.Username == paramUsername).FirstOrDefault();
-            if (usr != null)
-            {
-                var enc = new Encryption();
-                var pass = enc.Decrypt(usr.Password);
-                isAuthenticate = pass == paramPassword;
-            }
+            bool isAuthenticate = db.isValidLogin(paramUsername, paramPassword);
             // In this example we just log the user in
             // (Always log the user in for this demo)
             if (isAuthenticate)

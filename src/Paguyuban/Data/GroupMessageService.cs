@@ -1,46 +1,65 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.EntityFrameworkCore;
+using PdfSharp.Pdf.Content.Objects;
+using Redis.OM;
+using Redis.OM.Searching;
 using Paguyuban.Data;
 using Paguyuban.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-
+using static System.Formats.Asn1.AsnWriter;
 namespace Paguyuban.Data
 {
     public class GroupMessageService : ICrud<GroupMessage>
     {
-        PaguyubanDB db;
+        //PaguyubanDB db;
+        RedisConnectionProvider provider;
+        IRedisCollection<GroupMessage> db;
+        UserProfileService UserSvc;
 
-        public GroupMessageService()
+        public GroupMessageService(RedisConnectionProvider provider, UserProfileService userservice)
         {
-            if (db == null) db = new PaguyubanDB();
+            this.UserSvc = userservice;
+            this.provider = provider;
+            db = this.provider.RedisCollection<GroupMessage>();
+        }
+
+        public void RefreshEntity(GroupMessage item)
+        {
+            try
+            {
+                //do nothing
+            }
+            catch (Exception ex)
+            {
+
+                Console.WriteLine(ex);
+            }
+
 
         }
-        public bool DeleteData(object Id)
+        public bool DeleteData(GroupMessage item)
         {
-            var selData = (db.GroupMessages.Where(x => x.Id == (long)Id).FirstOrDefault());
-            db.GroupMessages.Remove(selData);
-            db.SaveChanges();
+            db.Delete(item);
             return true;
         }
 
         public List<GroupMessage> FindByKeyword(string Keyword)
         {
-            var data = from x in db.GroupMessages
-                       where x.Name.Contains(Keyword)
-                       select x;
+            var data = db.Where(x => x.Name.Contains(Keyword));
             return data.ToList();
         }
-
+       
         public List<GroupMessage> GetAllData()
         {
-            return db.GroupMessages.OrderBy(x => x.Id).ToList();
+            return db.ToList();
         }
 
-        public GroupMessage GetDataById(object Id)
+        public GroupMessage GetDataById(string Id)
         {
-            return db.GroupMessages.Where(x => x.Id == (long)Id).FirstOrDefault();
+            return db.Where(x => x.Id == Id).FirstOrDefault();
         }
 
 
@@ -48,64 +67,42 @@ namespace Paguyuban.Data
         {
             try
             {
-                db.GroupMessages.Add(data);
-                db.SaveChanges();
+                db.Insert(data);
+                //db.Save();
                 return true;
             }
-            catch
+            catch (Exception ex)
             {
-
+                Console.WriteLine(ex);
             }
             return false;
 
         }
-
-
 
         public bool UpdateData(GroupMessage data)
         {
             try
             {
-                db.Entry(data).State = EntityState.Modified;
-                db.SaveChanges();
-
-                /*
-                if (sel != null)
-                {
-                    sel.Nama = data.Nama;
-                    sel.Keterangan = data.Keterangan;
-                    sel.Tanggal = data.Tanggal;
-                    sel.DocumentUrl = data.DocumentUrl;
-                    sel.StreamUrl = data.StreamUrl;
-                    return true;
-
-                }*/
+                db.Update(data);
+                //db.Save();
                 return true;
             }
-            catch
+            catch (Exception ex)
             {
-
+                Console.WriteLine(ex);
             }
             return false;
         }
 
+        public GroupMessage GetDataById(object Id)
+        {
+            return db.Where(x => x.Id == Id.ToString()).FirstOrDefault();
+        }
+
         public long GetLastId()
         {
-            return db.GroupMessages.Max(x => x.Id);
+            throw new NotImplementedException();
         }
     }
 
 }
-/*
-
-
-
-
-
-
-
-
-
-
-
- */

@@ -7,116 +7,105 @@ using Paguyuban.Models;
 using GemBox.Spreadsheet;
 using System.Drawing;
 using Paguyuban.Tools;
+using Redis.OM.Searching;
+using Redis.OM;
+using ChartJs.Blazor.Common.Axes;
+using ServiceStack;
 
 namespace Paguyuban.Data
 {
     public class UserProfileService : ICrud<UserProfile>
     {
-        PaguyubanDB db;
-        public UserProfileService()
-        {
-            if (db == null) db = new PaguyubanDB();
-            //db.Database.EnsureCreated();
-        }
-        public bool DeleteData(object Id)
-        {
-            if (Id is long FID)
-            {
-                var data = from x in db.UserProfiles
-                           where x.Id == FID
-                           select x;
-                foreach (var item in data)
-                {
-                    db.UserProfiles.Remove(item);
-                }
-                db.SaveChanges();
-                return true;
-            }
-            return false;
-        }
-        public UserProfile GetItemByUsername(string UName)
-        {
-            if (string.IsNullOrEmpty(UName)) return null;
-            var selItem = db.UserProfiles.Where(x => x.Username.ToLower() == UName.ToLower()).FirstOrDefault();
-            return selItem;
-        }
-        public UserProfile GetItemByEmail(string Email)
-        {
-            if (string.IsNullOrEmpty(Email)) return null;
-            var selItem = db.UserProfiles.Where(x => x.Email.ToLower() == Email.ToLower()).FirstOrDefault();
-            return selItem;
-        }
-        public Roles GetUserRole(string Email)
-        {
-            var selItem = db.UserProfiles.Where(x => x.Username == Email).FirstOrDefault();
-            return selItem.Role;
-        } 
         
-        public UserProfile GetUserByEmail(string Email)
+        RedisConnectionProvider provider;
+        IRedisCollection<UserProfile> db;
+        public UserProfileService(RedisConnectionProvider provider)
         {
-            var selItem = db.UserProfiles.Where(x => x.Username == Email).FirstOrDefault();
-            return selItem;
+            this.provider = provider;
+            db = this.provider.RedisCollection<UserProfile>();
         }
-        public UserProfile GetItemByPhone(string Phone)
+        public bool Login(string username, string password)
         {
-            var selItem = db.UserProfiles.Where(x => x.Phone.ToLower() == Phone.ToLower()).FirstOrDefault();
-            return selItem;
+            bool isAuthenticate = false;
+            var usr = db.Where(x => x.Username == username).FirstOrDefault();
+            if (usr != null)
+            {
+                var enc = new Encryption();
+                var pass = enc.Decrypt(usr.Password);
+                isAuthenticate = pass == password;
+            }
+            return isAuthenticate;
         }
+        public bool DeleteData(UserProfile item)
+        {
+            db.Delete(item);
+            //db.SaveChanges();
+            return true;
+        }
+
         public List<UserProfile> FindByKeyword(string Keyword)
         {
-            var data = from x in db.UserProfiles
-                       where x.Email.Contains(Keyword) || x.FullName.Contains(Keyword)
-                       select x;
+            var data = db.Where(x => x.Username.Contains(Keyword));
             return data.ToList();
         }
-        
-        
+
+        public string GetProfilePic(string UserId)
+        {
+            var data = db.Where(x=>x.Id == UserId).FirstOrDefault();
+            return data == null ? "assets/images/avatars/avatar-2.jpg" : data.PicUrl;
+        }
 
         public List<UserProfile> GetAllData()
         {
-            var data = from x in db.UserProfiles
-                       select x;
-            return data.ToList();
+            return db.ToList();
         }
-
-        public UserProfile GetDataById(object Id)
+        public List<Contact> GetContacts(string username)
         {
-            if (Id is long FID)
+            var user = db.Where(x => x.Username == username).FirstOrDefault();
+            if (user != null)
             {
-                var data = from x in db.UserProfiles
-                           where x.Id == FID
-                           select x;
-                return data.FirstOrDefault();
+                return user.Contacts;
             }
-            return default;
+            else
+                return default;
+        }
+   
+
+        public UserProfile GetDataById(string Id)
+        {
+            return db.Where(x => x.Id == Id).FirstOrDefault();
         }
 
-        public long GetLastId()
+        public List<UserProfile> GetProfiles(string[] userids)
         {
-            var lastId = db.UserProfiles.OrderByDescending(x => x.Id).FirstOrDefault();
-            return lastId.Id + 1;
+            var persons = db.Where(x=> userids.Contains(x.Id)).ToList();
+            return persons;
+        } 
+        
+        public List<UserProfile> GetByUsernames(string[] usernames)
+        {
+            var persons = db.Where(x=> usernames.Contains(x.Username)).ToList();
+            return persons;
         }
-        public bool IsUserExists(string Email)
+        public UserProfile? GetProfile(string userids)
         {
-            if (string.IsNullOrEmpty(Email)) return true;
-            //if (db.UserProfiles.Count() <= 0 ) return false;
-            var exists = db.UserProfiles.Any(x => x.Username.ToLower() == Email.ToLower());
-            return exists;
+            if (string.IsNullOrEmpty(userids)) return new() { FullName = "anonymous" };
+            var persons = db.Where(x=>x.Id == userids).FirstOrDefault();
+            return persons;
         }
         public bool InsertData(UserProfile data)
         {
             try
             {
-                db.UserProfiles.Add(data);
-                db.SaveChanges();
+                db.Insert(data);
+                //db.SaveChanges();
                 return true;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.ToString());
-
-                return false;
+                Console.WriteLine(ex);
             }
+            return false;
 
         }
 
@@ -124,19 +113,85 @@ namespace Paguyuban.Data
         {
             try
             {
-                db.Entry(data).State = EntityState.Modified;
-                db.SaveChanges();
-
+                db.Update(data);
+                //db.SaveChanges();
                 return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return false;
-
-
+                Console.WriteLine(ex);
             }
+            return false;
+        }
+        public UserProfile GetItemByUsername(string UName)
+        {
+            if (string.IsNullOrEmpty(UName)) return null;
+            //var selItem = db.Where(x => x.Username.ToLower() == UName.ToLower()).FirstOrDefault();
+            var selItem = db.Where(x => x.Username == UName).FirstOrDefault();
+            return selItem;
+        }
+        public UserProfile GetItemByEmail(string Email)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(Email)) return null;
+                var selItem = db.Where(x => x.Email == Email).FirstOrDefault();
+                return selItem;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+            return default;
+        }
+        public Roles GetUserRole(string Email)
+        {
+            var selItem = db.Where(x => x.Username == Email).FirstOrDefault();
+            return selItem.Role;
+        }
+
+        public void RefreshEntity(UserProfile user)
+        {
+            //db.Advanced.Refresh(user);
+            //return user;
+        }
+        public UserProfile GetUserByEmail(string Email)
+        {
+
+            var selItem = db.Where(x => x.Username == Email).FirstOrDefault();
+            return selItem;
+        }
+        public UserProfile GetItemByPhone(string Phone)
+        {
+            var selItem = db.Where(x => x.Phone.ToLower() == Phone.ToLower()).FirstOrDefault();
+            return selItem;
+        }
+
+        public bool IsUserExists(string Email)
+        {
+            if (string.IsNullOrEmpty(Email)) return true;
+            //if (db.UserProfiles.Count() <= 0 ) return false;
+            //if (db.Count() <= 0) return false;
+
+            var exists = db.Any(x => x.Username == Email);
+            return exists;
+        }
+
+        public bool isValidLogin(string username, string password)
+        {
+            var anyUser = db.Where(x => x.Username == username).FirstOrDefault();
+            if (anyUser != null)
+            {
+                var enc = new Encryption();
+                var pass = enc.Decrypt(anyUser.Password);
+                if (password == pass) return true;
+            }
+            return false;
 
         }
+
+       
+
         #region Excel
         public static List<UserProfile> ReadExcel(string PathFile)
         {
@@ -167,17 +222,17 @@ namespace Paguyuban.Data
                         newUserProfile.Address = row.Cells[2].Value?.ToString().Trim();
                         newUserProfile.Phone = row.Cells[3].Value?.ToString().Trim();
                         newUserProfile.Email = row.Cells[4].Value?.ToString().Trim();
-                        newUserProfile.Aktif = row.Cells[5].Value?.ToString().Trim() == "Ya" ? true:false;
+                        newUserProfile.Aktif = row.Cells[5].Value?.ToString().Trim() == "Ya" ? true : false;
                         newUserProfile.KTP = row.Cells[6].Value?.ToString().Trim();
                         newUserProfile.Daerah = row.Cells[7].Value?.ToString().Trim();
                         newUserProfile.Desa = row.Cells[8].Value?.ToString().Trim();
                         newUserProfile.Kelompok = row.Cells[9].Value?.ToString().Trim();
-                        newUserProfile.Username = string.IsNullOrEmpty(row.Cells[10].Value?.ToString().Trim()) ? MailHelper.GenerateEmailFromName(newUserProfile.FullName.Trim(), "Paguyuban.online") :  row.Cells[10].Value?.ToString().Trim();
+                        newUserProfile.Username = string.IsNullOrEmpty(row.Cells[10].Value?.ToString().Trim()) ? MailHelper.GenerateEmailFromName(newUserProfile.FullName.Trim(), "Paguyuban.online") : row.Cells[10].Value?.ToString().Trim();
                         if (string.IsNullOrEmpty(newUserProfile.Email))
                         {
                             newUserProfile.Email = newUserProfile.Username;
                         }
-                        newUserProfile.Role = row.Cells[11].Value?.ToString().Trim() == "Ya" ? Roles.Pengurus  : Roles.User;
+                        newUserProfile.Role = row.Cells[11].Value?.ToString().Trim() == "Ya" ? Roles.Pengurus : Roles.User;
                         newUserProfile.Password = DefaultPass;
                         DataUserProfile.Add(newUserProfile);
                     }
@@ -201,7 +256,7 @@ namespace Paguyuban.Data
             try
             {
                 Encryption enc = new Encryption();
-                var currentData = db.UserProfiles.ToList();
+                var currentData = db.ToList();
                 foreach (var item in NewData)
                 {
                     //UserProfile? existing = null;
@@ -212,11 +267,11 @@ namespace Paguyuban.Data
                     //        existing = x; break;
                     //    }
                     //}
-                    var existing = currentData.Where(x => x.Username.Equals(item.Username,StringComparison.InvariantCultureIgnoreCase)).FirstOrDefault();
+                    var existing = currentData.Where(x => x.Username.Equals(item.Username, StringComparison.InvariantCultureIgnoreCase)).FirstOrDefault();
                     if (existing == null)
                     {
                         item.Password = enc.Encrypt(AppConstants.DefaultPass);
-                        db.UserProfiles.Add(item);
+                        db.Insert(item);
                     }
                     else
                     {
@@ -233,16 +288,16 @@ namespace Paguyuban.Data
                         existing.Role = item.Role;
                     }
                 }
-                db.SaveChanges();
+                //db.SaveChanges();
                 output.IsSucceed = true;
-               
+
             }
             catch (Exception ex)
             {
                 output.IsSucceed = false;
                 output.Message = ex.ToString();
                 Console.WriteLine(ex);
-             
+
             }
             return output;
         }
@@ -265,7 +320,7 @@ namespace Paguyuban.Data
             styleHeader.WrapText = true;
             styleHeader.Borders.SetBorders(MultipleBorders.Left | MultipleBorders.Right | MultipleBorders.Top | MultipleBorders.Bottom, Color.Black, LineStyle.Thin);
 
-         
+
 
             worksheet.Cells[0, 0].Value = "No";
             worksheet.Cells[0, 1].Value = "Nama";
@@ -279,7 +334,7 @@ namespace Paguyuban.Data
             worksheet.Cells[0, 9].Value = "Kelompok";
             worksheet.Cells[0, 10].Value = "Username";
             worksheet.Cells[0, 11].Value = "Pengurus";
-          
+
 
             worksheet.Cells[0, 0].Style = styleHeader;
             worksheet.Cells[0, 1].Style = styleHeader;
@@ -293,7 +348,7 @@ namespace Paguyuban.Data
             worksheet.Cells[0, 9].Style = styleHeader;
             worksheet.Cells[0, 10].Style = styleHeader;
             worksheet.Cells[0, 11].Style = styleHeader;
-         
+
 
             var style = new CellStyle();
             style.HorizontalAlignment = HorizontalAlignmentStyle.Center;
@@ -306,21 +361,21 @@ namespace Paguyuban.Data
             foreach (var item in datas)
             {
 
-             
+
 
                 worksheet.Cells[row, 0].Value = row;
                 worksheet.Cells[row, 1].Value = item.FullName;
                 worksheet.Cells[row, 2].Value = item.Address;
                 worksheet.Cells[row, 3].Value = item.Phone;
                 worksheet.Cells[row, 4].Value = item.Email;
-                worksheet.Cells[row, 5].Value = item.Aktif? "Ya":"Tidak";
+                worksheet.Cells[row, 5].Value = item.Aktif ? "Ya" : "Tidak";
                 worksheet.Cells[row, 6].Value = item.KTP;
                 worksheet.Cells[row, 7].Value = item.Daerah;
                 worksheet.Cells[row, 8].Value = item.Desa;
                 worksheet.Cells[row, 9].Value = item.Kelompok;
                 worksheet.Cells[row, 10].Value = item.Username?.ToString();
-                worksheet.Cells[row, 11].Value = item.Role == Roles.Pengurus?"Ya":"Tidak";
-           
+                worksheet.Cells[row, 11].Value = item.Role == Roles.Pengurus ? "Ya" : "Tidak";
+
 
                 worksheet.Cells[row, 0].Style = style;
                 worksheet.Cells[row, 1].Style = style;
@@ -334,14 +389,24 @@ namespace Paguyuban.Data
                 worksheet.Cells[row, 9].Style = style;
                 worksheet.Cells[row, 10].Style = style;
                 worksheet.Cells[row, 11].Style = style;
-           
-              
+
+
                 row++;
             }
             var tmpfile = Path.GetTempFileName() + ".xlsx";
 
             workbook.Save(tmpfile);
             return File.ReadAllBytes(tmpfile);
+        }
+
+        public UserProfile GetDataById(object Id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public long GetLastId()
+        {
+            throw new NotImplementedException();
         }
         #endregion
     }

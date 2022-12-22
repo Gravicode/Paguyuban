@@ -155,7 +155,7 @@
     protected override async Task OnInitializedAsync()
     {
         enc = new Encryption();
-        if (service == null) service = new UserProfileService();
+       
         var user = (await authenticationStateTask).User;
 
         if (user.Identity.IsAuthenticated)

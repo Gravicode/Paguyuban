@@ -11,6 +11,9 @@ using PdfSharp.Charting;
 using System.Net;
 using Microsoft.AspNetCore.Hosting.StaticWebAssets;
 using Paguyuban.Models;
+using Redis.OM;
+using Redis.OM.Searching;
+using Redis.OM.Skeleton.HostedServices;
 
 var builder = WebApplication.CreateBuilder(args);
 Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
@@ -42,15 +45,9 @@ builder.Services.AddScoped<HttpClient>();
 builder.Services.AddTransient<AzureBlobHelper>();
 builder.Services.AddTransient<LogService>();
 builder.Services.AddTransient<UserProfileService>();
-builder.Services.AddTransient<ContactService>();
 builder.Services.AddTransient<NotificationService>();
-builder.Services.AddTransient<MessageHeaderService>();
-builder.Services.AddTransient<MessageDetailService>();
-builder.Services.AddTransient<MessageAttachmentService>();
+builder.Services.AddTransient<MessageBoxService>();
 builder.Services.AddTransient<GroupMessageService>();
-builder.Services.AddTransient<GroupMessageMemberService>();
-builder.Services.AddTransient<NoteService>();
-builder.Services.AddTransient<TodoService>();
 
 builder.Services.AddCors(options =>
 {
@@ -97,7 +94,24 @@ SmsService.PassKey = Configuration["SmsSettings:ZenzivaPassKey"];
 SmsService.TokenKey = Configuration["SmsSettings:TokenKey"];
 
 
+AppConstants.StorageEndpoint = Configuration["Storage:Endpoint"];
+AppConstants.StorageAccess = Configuration["Storage:Access"];
+AppConstants.StorageSecret = Configuration["Storage:Secret"];
+AppConstants.StorageBucket = Configuration["Storage:Bucket"];
+var setting = new StorageSetting() { };
+setting.Bucket = AppConstants.StorageBucket;
+setting.SecretKey = AppConstants.StorageSecret;
+setting.AccessKey = AppConstants.StorageAccess;
+
+
+builder.Services.AddSingleton(new RedisConnectionProvider(AppConstants.RedisCon));
+var idx = new IndexCreationService();
+await idx.CreateIndex();
+builder.Services.AddSingleton(idx);
+
 AppConstants.DefaultPass = Configuration["App:DefaultPass"];
+builder.Services.AddSingleton(setting);
+builder.Services.AddTransient<StorageObjectService>();
 
 builder.Services.AddSignalR(hubOptions =>
 {
@@ -153,8 +167,8 @@ app.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 
-var db = new PaguyubanDB();
-db.Database.EnsureCreated();
+//var db = new PaguyubanDB();
+//db.Database.EnsureCreated();
 
 
 app.Run();

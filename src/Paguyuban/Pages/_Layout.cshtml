@@ -1,7 +1,13 @@
 ﻿@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Components;
 @namespace Paguyuban.Pages
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@inject NavigationManager NavMgr
 
+@{
+    var uri = new Uri(NavMgr.Uri);
+    bool IsNoAuth = uri.AbsoluteUri.Contains("/sign-in") || uri.AbsoluteUri.Contains("/register") || uri.AbsoluteUri.Contains("/forgot-password");
+}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -39,17 +45,16 @@
     <component type="typeof(HeadOutlet)" render-mode="ServerPrerendered" />
 
 </head>
-<body class="chats-tab-open">
-
+<body class="@(IsNoAuth ? "authentication-page":"chats-tab-open")">
+    
     @RenderBody()
-
+   
     <script src="assets/vendors/jquery/jquery-3.5.0.min.js"></script>
     <script src="assets/vendors/bootstrap/bootstrap.bundle.min.js"></script>
     <script src="assets/vendors/magnific-popup/jquery.magnific-popup.min.js"></script>
     <script src="assets/vendors/svg-inject/svg-inject.min.js"></script>
     <script src="assets/vendors/modal-stepes/modal-steps.min.js"></script>
     <script src="assets/js/app.js"></script>
-
     
     <script type="module" src="js/webcam.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js" integrity="sha512-s/XK4vYVXTGeUSv4bRPOuxSDmDlTedEpMEcAQk0t/FMd9V6ft8iXdwSBxV0eD60c6w/tjotSlKu9J2AAW1ckTA==" crossorigin="anonymous"></script>

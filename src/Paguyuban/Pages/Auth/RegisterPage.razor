@@ -3,93 +3,57 @@
 @inject NavigationManager NavMgr
 @inject IToastService toastService
 @using Paguyuban.Tools
+@inject UserProfileService svc
+@layout NoAuthLayout
 
-<TitleBarPage MenuName="Register"></TitleBarPage>
-
-
-<!-- Page Content
-================================================== -->
-<div class="container">
-    <div class="row">
-        <div class="col-xl-5 offset-xl-3">
-
-            <div class="login-register-page">
-                <!-- Welcome Text -->
-                <div class="welcome-text">
-                    <h3 style="font-size: 26px;">Let's create your account!</h3>
-                    <span>Already have an account? <a href="/auth/login">Log In!</a></span>
-                </div>
-
-             
-
-                <!-- Form -->
-                <div id="register-account-form">
-                    <div class="input-with-icon-left">
-                        <i class="icon-material-baseline-mail-outline"></i>
-                        <input type="email" class="input-text with-border" @bind="DataUser.Email" name="emailaddress-register" id="emailaddress-register" placeholder="Email Address" required />
-                    </div>
-
-                    <div class="input-with-icon-left">
-                        <i class="icon-material-baseline-people-outline"></i>
-                        <input type="text" class="input-text with-border" @bind="DataUser.FirstName" name="firstname-register" id="firstname-register" placeholder="First Name" required />
-                    </div>
-
-                    <div class="input-with-icon-left">
-                        <i class="icon-material-baseline-people-outline"></i>
-                        <input type="text" class="input-text with-border" @bind="DataUser.LastName" name="lastname-register" id="lastname-register" placeholder="Last Name" required />
-                    </div>
-
-                    <div class="input-with-icon-left">
-                        <i class="icon-material-baseline-people-outline"></i>
-                        <input type="tel" class="input-text with-border" @bind="DataUser.Phone" name="phone-register" id="phone-register" placeholder="Phone" required />
-                    </div>
-
-
-                    <div class="input-with-icon-left">
-                        <i class="icon-material-baseline-people-outline"></i>
-                        <input type="text" class="input-text with-border" @bind="DataUser.Address" name="address-register" id="address-register" placeholder="Address" required />
-                    </div>
-
-                    <div class="input-with-icon-left" title="Should be at least 8 characters long" data-tippy-placement="bottom">
-                        <i class="icon-material-outline-lock"></i>
-                        <input type="password" class="input-text with-border" @bind="DataUser.Password" name="password-register" id="password-register" placeholder="Password" required />
-                    </div>
-
-                    <div class="input-with-icon-left">
-                        <i class="icon-material-outline-lock"></i>
-                        <input type="password" class="input-text with-border" @bind="RetypePass" name="password-repeat-register" id="password-repeat-register" placeholder="Repeat Password" required />
-                    </div>
-
-                    <div class="input-with-icon-left">
-                        <img src="@CaptchaImage" style="text-align:center;margin-bottom:5px;mr-1;mb-1">
-                        <button @onclick="GenerateCaptcha" class="btn btn-success mb-1">Change</button>
-                    </div>
-
-                    <div class="input-with-icon-left">
-                        <i class="icon-material-baseline-people-outline"></i>
-                        <input type="text" @bind="TypedCaptcha" class="input-text with-border" name="captcha-register" id="captcha-register" placeholder="Type Captcha" required />
-                    </div>
-                </div>
-
-                <!-- Button -->
-                <button class="button full-width button-sliding-icon ripple-effect margin-top-10" type="button" @onclick="DaftarUser" form="login-form">Register <i class="icon-material-outline-arrow-right-alt"></i></button>
-
-                <!-- Social Login -->
-                <div class="social-login-separator"><span>or</span></div>
-                <div class="social-login-buttons">
-                    <button @onclick="NotAvailable" class="facebook-login ripple-effect"><i class="icon-brand-facebook-f"></i> Register via Facebook</button>
-                    <button @onclick="NotAvailable" class="google-login ripple-effect"><i class="icon-brand-google-plus-g"></i> Register via Google+</button>
-                </div>
+<div class="row no-gutters text-center align-items-center justify-content-center min-vh-100">
+    <div class="col-12 col-md-6 col-lg-5 col-xl-4">
+        <h1 class="font-weight-bold">Sign up</h1>
+        <p class="text-dark mb-3">We are Different, We Make You Different.</p>
+        <form class="mb-3">
+            <div class="form-group">
+                <label for="name" class="sr-only">First Name</label>
+                <input type="text" @bind="DataUser.FirstName" class="form-control form-control-md" id="name" placeholder="Enter your first name">
             </div>
+            <div class="form-group">
+                <label for="lastname" class="sr-only">Last Name</label>
+                <input type="text" @bind="DataUser.LastName" class="form-control form-control-md" id="lastname" placeholder="Enter your last name">
+            </div>
+            <div class="form-group">
+                <label for="email" class="sr-only">Email Address</label>
+                <input type="email" @bind="DataUser.Email" class="form-control form-control-md" id="email" placeholder="Enter your email">
+            </div> 
+            <div class="form-group">
+                <label for="phone" class="sr-only">Phone</label>
+                <input type="tel" @bind="DataUser.Phone" class="form-control form-control-md" id="phone" placeholder="Enter your Phone">
+            </div>
+            <div class="form-group">
+                <label for="address" class="sr-only">Address</label>
+                <input type="text" @bind="DataUser.Address" class="form-control form-control-md" id="address" placeholder="Enter your Address">
+            </div>
+            <div class="form-group">
+                <label for="password" class="sr-only">Password</label>
+                <input type="password" @bind="DataUser.Password" class="form-control form-control-md" id="password" placeholder="Enter your password">
+            </div> 
+            <div class="form-group">
+                <label for="password2" class="sr-only">Retype Password</label>
+                <input type="password" @bind="RetypePass" class="form-control form-control-md" id="password2" placeholder="Retype your password">
+            </div> 
+            <div class="form-group">
+                <img src="@CaptchaImage" style="text-align:center;margin-bottom:5px;mr-1;mb-1">
+                <button @onclick="GenerateCaptcha" class="btn btn-success mb-1">Change</button>
+            </div>
+            <div class="form-group">
+                <label for="captcha" class="sr-only">Captcha</label>
+                <input type="text" @bind="TypedCaptcha" class="form-control form-control-md" id="captcha" placeholder="Enter captcha">
+            </div>
+            <button class="btn btn-primary btn-lg btn-block text-uppercase font-weight-semibold" @onclick="DaftarUser" type="button">Sign up</button>
+        </form>
 
-        </div>
+        <p>Already have an account? <a class="font-weight-semibold" href="/sign-in">Sign in</a>.</p>
     </div>
 </div>
 
-
-<!-- Spacer -->
-<div class="margin-top-70"></div>
-<!-- Spacer / End-->
 @code {
     public string CaptchaImage { get; set; }
     public string Answer { get; set; }
@@ -106,18 +70,19 @@
         toastService.ShowWarning("Feature is not available yet");
     }
 
-   
+
 
     void GenerateCaptcha()
     {
         Random oRandom = new Random();
         int iNumber = oRandom.Next(1000, 9999);
         Answer = iNumber.ToString();
-        var temp = CaptchaGenerator.GetCaptcha(Answer, 158, 70);
+        SkiaCaptchaGenerator gen = new SkiaCaptchaGenerator();
+        var temp = gen.GenerateImageAsByteArray(Answer, SkiaSharp.SKEncodedImageFormat.Jpeg);
         string base64String = Convert.ToBase64String(temp, 0, temp.Length);
         CaptchaImage = "data:image/png;base64," + base64String;
     }
-   
+
     protected override async Task OnInitializedAsync()
     {
         if (string.IsNullOrEmpty(CaptchaImage))
@@ -127,7 +92,7 @@
     {
         bool isPengurus = false;
         ErrorMsg = "";
-        UserProfileService svc = new UserProfileService();
+
         if (string.IsNullOrEmpty(TypedCaptcha))
         {
             ErrorMsg += "Tolong isi Captcha. ";

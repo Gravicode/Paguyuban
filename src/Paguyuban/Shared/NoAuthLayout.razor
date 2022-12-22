@@ -1,20 +1,26 @@
 ﻿@inherits LayoutComponentBase
 @using Blazored.Toast.Configuration
+@inject IJSRuntime IJS
 
 @page "/auth/{Slug}"
 
-            <CascadingValue Value="Slug">
-            </CascadingValue>
+<!-- Main Layout Start -->
+<div class="main-layout card-bg-1">
+    <div class="container d-flex flex-column">
+        <CascadingValue Value="this">
             @Body
-
+        </CascadingValue>
+    </div>
+</div>
+<!-- Main Layout End -->
 
 <BlazoredToasts Position="ToastPosition.BottomRight"
-Timeout="10"
-SuccessClass="success-toast-override"
-SuccessIconClass="fa fa-thumbs-up"
-ErrorIconClass="fa fa-bug" />
+                Timeout="10"
+                SuccessClass="success-toast-override"
+                SuccessIconClass="fa fa-thumbs-up"
+                ErrorIconClass="fa fa-bug" />
 
-@code{
+@code {
     [Parameter]
     public string Slug { get; set; } = "login";
 
@@ -28,5 +34,13 @@ ErrorIconClass="fa fa-bug" />
             //Slug = slug?.ToString();
         }
         */
+    }
+    protected override void OnAfterRender(bool firstRender)
+    {
+
+        if (firstRender)
+        {
+            IJS.InvokeVoidAsync("InitApp");
+        }
     }
 }
