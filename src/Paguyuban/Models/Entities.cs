@@ -216,15 +216,14 @@ namespace Paguyuban.Models
     //[Table("note")]
     public class Note
     {
-
+        [Indexed(Sortable = true)]
+        public string NoteId { set; get; }
         //[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         //[Key, Column(Order = 0)]
         //[RedisIdField] public string Id { get; set; }
         //[ForeignKey(nameof(User)), Column(Order = 0)]
-        [Indexed(Sortable = true)]
-        public string UserId { set; get; }
-        [Indexed(Sortable = true)]
-        public UserProfile User { set; get; }
+       
+      
         [Indexed(Sortable = true)]
         public string Title { set; get; }
         [Indexed(Sortable = true)]

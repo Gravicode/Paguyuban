@@ -1,0 +1,240 @@
+﻿@inject UserProfileService UserSvc
+@inject IToastService toastService
+@inject IJSRuntime IJS
+@inject AppState AppState
+@implements IDisposable
+<div class="tab-pane h-100" id="notes" role="tabpanel" aria-labelledby="notes-tab">
+    <div class="appnavbar-content-wrapper">
+        <div class="appnavbar-scrollable-wrapper">
+            <div class="appnavbar-heading sticky-top">
+                <ul class="nav justify-content-between align-items-center">
+                    <!-- Sidebar Title Start -->
+                    <li class="text-center">
+                        <h5 class="text-truncate mb-0">Notes</h5>
+                    </li>
+                    <!-- Sidebar Title End -->
+                    <!-- Close Sidebar Start -->
+                    <li class="nav-item list-inline-item">
+                        <div data-appcontent-close="">
+                            <!-- Default :: Inline SVG -->
+                            <svg class="hw-22" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+
+                            <!-- Alternate :: External File link -->
+                            <!-- <img class="injectable hw-22" src="./../assets/media/heroicons/outline/x.svg" alt=""> -->
+
+                        </div>
+                    </li>
+                    <!-- Close Sidebar End -->
+                </ul>
+            </div>
+
+            <div class="appnavbar-body">
+                <div class="appnavbar-body-title">
+                    <!-- Sidebar Header Dropdown Start -->
+                    <div class="dropdown mr-2">
+                        <!-- Dropdown Button Start -->
+                        <button class="btn btn-outline-default dropdown-toggle" type="button" data-notes-filter-list="" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">@SelectedTag</button>
+                        <!-- Dropdown Button End -->
+                        <!-- Dropdown Menu Start -->
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" @onclick='()=>SelectTag("All")' data-notes-filter="" data-select="all-chats" href="#">All Notes</a>
+                            <a class="dropdown-item" @onclick='()=>SelectTag("Personal")' data-notes-filter="" data-select="friends" href="#">Personal</a>
+                            <a class="dropdown-item" @onclick='()=>SelectTag("Work")' data-notes-filter="" data-select="groups" href="#">Work</a>
+                            <a class="dropdown-item" @onclick='()=>SelectTag("Favourite")' data-notes-filter="" data-select="unread" href="#">Favourite</a>
+                            <a class="dropdown-item" @onclick='()=>SelectTag("Important")' data-notes-filter="" data-select="archived" href="#">Important</a>
+                        </div>
+                        <!-- Dropdown Menu End -->
+                    </div>
+                    <!-- Sidebar Header Dropdown End -->
+                    <!-- Sidebar Search Start -->
+                    <form class="form-inline">
+                        <div class="input-group">
+                            <input type="text" @bind="Keyword" @onkeyup="KeyUp" class="form-control search border-right-0 transparent-bg pr-0" placeholder="Search notes">
+                            <div class="input-group-append">
+                                <div class="input-group-text transparent-bg border-left-0" role="button">
+                                    <!-- Default :: Inline SVG -->
+                                    <svg class="text-muted hw-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                    </svg>
+
+                                    <!-- Alternate :: External File link -->
+                                    <!-- <img class="injectable hw-20" src="./../assets/media/heroicons/outline/search.svg" alt=""> -->
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                    <!-- Sidebar Search End -->
+                </div>
+
+                <div class="note-container">
+                    <Virtualize Items="@ListNotes" Context="item">
+                        <div @key="item.NoteId" class="note">
+                            <div class="note-body">
+                                <div class="note-added-on">@($"{item.CreatedDate.ToString("dddd, dd/MM/yyyy")} at {item.CreatedDate.ToString("HH:mm")}")</div>
+                                <h5 class="note-title">@item.Title</h5>
+                                <p class="note-description">@item.Message</p>
+                            </div>
+                            <div class="note-footer">
+                                <div class="note-tools">
+                                    @switch (item.Tag)
+                                    {
+                                        case "Personal":
+                                            <span class="badge badge-info">@item.Tag</span>
+                                            break;
+                                        case "Work":
+                                            <span class="badge badge-warning">@item.Tag</span>
+                                            break;
+                                        case "Favourite":
+                                            <span class="badge badge-primary">@item.Tag</span>
+                                            break;
+                                        case "Important":
+                                            <span class="badge badge-danger">@item.Tag</span>
+                                            break;
+                                    }
+
+                                </div>
+                                <div class="note-tools">
+                                    <div class="dropdown">
+                                        <button class="btn btn-secondary btn-icon btn-minimal btn-sm text-muted" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <!-- <img class="injectable hw-20" src="./../assets/media/heroicons/outline/dots-vertical.svg" alt=""> -->
+                                            <svg class="hw-20" xmlns="http://www.w3.org/2000/svg" height="24" width="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                                            </svg>
+
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-right">
+                                            <a class="dropdown-item" @onclick='()=>ChangeTag(item,"Personal")' href="#">Personal</a>
+                                            <a class="dropdown-item" @onclick='()=>ChangeTag(item,"Work")' href="#">Work</a>
+                                            <a class="dropdown-item" @onclick='()=>ChangeTag(item,"Favourite")' href="#">Favourite</a>
+                                            <a class="dropdown-item" @onclick='()=>ChangeTag(item,"Important")' href="#">Important</a>
+                                            <div class="dropdown-divider"></div>
+                                            <a class="dropdown-item text-danger" @onclick="(() => Delete(item))" href="#">Delete</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </Virtualize>
+
+                </div>
+            </div>
+
+            <div class="appnavbar-footer">
+                <div class="btn btn-primary btn-block" role="button" @onclick="(() => InitializeitemObject())"  data-toggle="modal" data-target="#addNoteModal">Add new note</div>
+            </div>
+        </div>
+    </div>
+</div>
+<ConfirmDialog OnClick="@Delete" />
+@code {
+    [CascadingParameter]
+    public MainLayout Layout { get; set; }
+    Note itemObject = new ();
+    UserProfile SelUser = new UserProfile();
+    List<Note> ListNotes = new();
+    string Keyword;
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+    string UserName;
+    string SelectedTag="All";
+    private async Task Delete()
+    {
+        SelUser.Notes.Remove(itemObject);
+        var res = UserSvc.UpdateData(SelUser);
+        if (res)
+        {
+            await LoadData();
+            toastService.ShowSuccess("Item deleted.");
+        }
+        await IJS.InvokeAsync<object>("CloseModal", "confirmDeleteModal");
+        itemObject = new();
+    } 
+    private async Task Delete(Note item)
+    {
+        SelUser.Notes.Remove(item);
+        var res = UserSvc.UpdateData(SelUser);
+        if (res)
+        {
+            await LoadData();
+            toastService.ShowSuccess("Item deleted.");
+        }
+    }
+    private void InitializeitemObject()
+    {
+
+        itemObject = new ();
+        itemObject.NoteId = Guid.NewGuid().ToString();
+        Layout.NewNote = itemObject;
+
+    }
+    async void Refresh(string username)
+    {
+        if (SelUser.Username == username)
+        {
+            await LoadData();
+            StateHasChanged();
+        }
+    }
+    public void Dispose()
+    {
+        AppState.OnNotesAdded -= Refresh;
+    }
+    private void PrepareForDelete(Note item)
+    {
+        itemObject = item;
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        var user = (await authenticationStateTask).User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            UserName = user.Identity.Name;
+            SelUser = UserSvc.GetItemByUsername(UserName);
+            await LoadData();
+        }
+        AppState.OnNotesAdded += Refresh;
+    }
+
+
+    async Task ChangeTag(Note item, string Tag)
+    {
+        item.Tag = Tag;
+        var res = UserSvc.UpdateData(SelUser);
+        if (res)
+        {
+            await LoadData();
+            toastService.ShowSuccess("Tag updated.");
+        }
+    }
+
+    async Task SelectTag(string Tag)
+    {
+        SelectedTag = Tag;
+        await LoadData();
+    }
+
+    async Task LoadData()
+    {
+        IEnumerable<Note> data = SelUser.Notes.AsEnumerable();
+        if (!string.IsNullOrEmpty(Keyword))
+            data = data.Where(x => x.Title.Contains(Keyword));
+
+        if (string.IsNullOrEmpty(SelectedTag) || SelectedTag == "All")
+
+            ListNotes = data.OrderBy(x => x.CreatedDate).ToList();
+        else
+            ListNotes = data.Where(x => x.Tag == SelectedTag).ToList();
+
+    }
+    async Task KeyUp(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await LoadData();
+            //Console.WriteLine(this.Value);
+        }
+    }
+}
