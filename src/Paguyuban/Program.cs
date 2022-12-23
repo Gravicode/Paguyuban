@@ -48,6 +48,9 @@ builder.Services.AddTransient<UserProfileService>();
 builder.Services.AddTransient<NotificationService>();
 builder.Services.AddTransient<MessageBoxService>();
 builder.Services.AddTransient<GroupMessageService>();
+builder.Services.AddTransient<NoteService>();
+builder.Services.AddTransient<TodoService>();
+builder.Services.AddTransient<ContactService>();
 builder.Services.AddSingleton<AppState>();
 
 builder.Services.AddCors(options =>

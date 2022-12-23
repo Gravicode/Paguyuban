@@ -12,6 +12,12 @@ using System.Runtime.CompilerServices;
 namespace Paguyuban.Models
 {
     #region helpers model
+    public class TodoDay
+    {
+        public string Key { get; set; }
+        public DateTime Tanggal { get; set; }
+        public List<Todo> Datas { get; set; }
+    }
     public class OutputCls
     {
         public OutputCls()
@@ -70,7 +76,7 @@ namespace Paguyuban.Models
     public class MessageBox
     {
 
-        [RedisIdField] public string Id { get; set; }
+        [RedisIdField][Indexed] public string Id { get; set; }
 
         [Indexed(Sortable = true)]
         public string UserId { get; set; }
@@ -134,17 +140,17 @@ namespace Paguyuban.Models
     //public enum AttachmentTypes { Doc, Video, Audio, Link, Location };
 
     //[Table("contact")]
+    [Document(StorageType = StorageType.Json)]
     public class Contact
     {
 
         //[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         //[Key, Column(Order = 0)]
-        //[RedisIdField] public string Id { get; set; }
+        [RedisIdField][Indexed] public string Id { get; set; }
         //[ForeignKey(nameof(User)), Column(Order = 0)]
         [Indexed(Sortable = true)]
-        public string UserId { set; get; }
-        [Indexed(Sortable = true)]
-        public UserProfile User { set; get; }
+        public string Username { set; get; }
+      
         [Indexed(Sortable = true)]
         public string? FullName { set; get; }
         [Indexed(Sortable = true)]
@@ -166,6 +172,7 @@ namespace Paguyuban.Models
         [Indexed(Sortable = true)]
         public string? LinkedIn { set; get; }
     }
+
     [Table("group_message")]
     [Document(StorageType = StorageType.Json)]
     public class GroupMessage
@@ -173,7 +180,7 @@ namespace Paguyuban.Models
 
         //[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         //[Key, Column(Order = 0)]
-        [RedisIdField] public string Id { get; set; }
+        [RedisIdField][Indexed] public string Id { get; set; }
         [Indexed(Sortable = true)]
         public string MessageUid { set; get; }
         [Indexed(Sortable = true)]
@@ -200,7 +207,7 @@ namespace Paguyuban.Models
 
         //[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         //[Key, Column(Order = 0)]
-        //[RedisIdField] public string Id { get; set; }
+        //[RedisIdField][Indexed] public string Id { get; set; }
         //[ForeignKey(nameof(GroupMessage)), Column(Order = 0)]
         //public long GroupMessageId { set; get; }
         //public GroupMessage GroupMessage { set; get; }
@@ -214,40 +221,45 @@ namespace Paguyuban.Models
     }
 
     //[Table("note")]
+    [Document(StorageType = StorageType.Json)]
     public class Note
     {
-        [Indexed(Sortable = true)]
-        public string NoteId { set; get; }
+       
         //[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         //[Key, Column(Order = 0)]
-        //[RedisIdField] public string Id { get; set; }
+        [RedisIdField][Indexed] public string Id { get; set; }
         //[ForeignKey(nameof(User)), Column(Order = 0)]
-       
-      
+
+        [Indexed(Sortable = true)]
+        public string Username { set; get; }
+
         [Indexed(Sortable = true)]
         public string Title { set; get; }
+
         [Indexed(Sortable = true)]
         public string? Message { set; get; }
+
         [Indexed(Sortable = true)]
         public string? Tag { set; get; }
+
         [Indexed(Sortable = true)]
         public DateTime CreatedDate { set; get; }
 
     }
 
     //[Table("todo")]
+    [Document(StorageType = StorageType.Json)]
     public class Todo
     {
 
         //[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         //[Key, Column(Order = 0)]
-        //[RedisIdField] public string Id { get; set; }
+        [RedisIdField][Indexed] public string Id { get; set; }
 
         //[ForeignKey(nameof(User)), Column(Order = 0)]
         [Indexed(Sortable = true)]
-        public string UserId { set; get; }
-        [Indexed(Sortable = true)]
-        public UserProfile User { set; get; }
+        public string Username { set; get; }
+ 
         [Indexed(Sortable = true)]
         public string Title { set; get; }
         [Indexed(Sortable = true)]
@@ -267,7 +279,7 @@ namespace Paguyuban.Models
     {
         //[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         //[Key, Column(Order = 0)]
-        [RedisIdField] public string Id { get; set; }
+        [RedisIdField][Indexed] public string Id { get; set; }
         [Indexed(Sortable = true)]
         public DateTime CreatedDate { set; get; }
         [Indexed(Sortable = true)]
@@ -296,7 +308,7 @@ namespace Paguyuban.Models
     {
         //[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         //[Key, Column(Order = 0)]
-        [RedisIdField] public string Id { get; set; }
+        [RedisIdField][Indexed] public string Id { get; set; }
         [Indexed(Sortable = true)]
         public string CreatedBy { get; set; }
         [Indexed(Sortable = true)]
@@ -313,7 +325,7 @@ namespace Paguyuban.Models
     {
         //[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         //[Key, Column(Order = 0)]
-        [RedisIdField] public string Id { get; set; }
+        [RedisIdField][Indexed] public string Id { get; set; }
         [Indexed(Sortable = true)]
         public string Username { get; set; }
         [Indexed(Sortable = true)]
@@ -388,22 +400,6 @@ namespace Paguyuban.Models
         public bool TwoFactor { set; get; }  
         [Indexed(Sortable = true)]
         public bool AlertIntruder { set; get; }
-
-
-        //[InverseProperty(nameof(MessageHeader.User))]
-        //public List<MessageHeader> UserMessages { get; set; }
-
-        //[InverseProperty(nameof(Contact.User))]
-        public List<Contact> Contacts { get; set; } = new();
-
-        //[InverseProperty(nameof(GroupMessage.CreatedBy))]
-        //public List<string> GroupMessageIds { get; set; }
-
-        //[InverseProperty(nameof(Note.User))]
-        public List<Note> Notes { get; set; } = new();
-
-        //[InverseProperty(nameof(Todo.User))]
-        public List<Todo> Todos { get; set; } = new();
 
     }
 

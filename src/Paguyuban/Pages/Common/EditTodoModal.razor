@@ -1,0 +1,78 @@
+﻿@inject UserProfileService UserSvc
+@inject TodoService TodoSvc
+@inject IJSRuntime IJS
+@inject IToastService toastService
+@inject AppState AppState
+
+<div class="modal modal-lg-fullscreen fade" id="taskModal" tabindex="-1" role="dialog" aria-labelledby="taskModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-dialog-zoom">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="taskModalLabel">Edit task</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label for="editTaskName" class="col-form-label">Task name:</label>
+                        <input type="text" @bind="EditTodo.Title" class="form-control" id="editTaskName" placeholder="Add task name here">
+                    </div>
+                    <div class="form-group">
+                        <label for="editTaskDetails" class="col-form-label">Task details:</label>
+                        <textarea @bind="EditTodo.Message" class="form-control hide-scrollbar" id="editTaskDetails" rows="4" placeholder="Add task descriptions">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Omnis temporibus vel, molestiae nobis dolor aut sapiente. Vero possimus molestias consequatur quod, quo rem autem molestiae, accusantium nemo culpa eos doloremque?
+                        </textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light border" data-dismiss="modal">Close</button>
+                <button type="button" @onclick="()=>Save(true)" class="btn btn-success">Finish</button>
+                <button type="button" @onclick="Save" class="btn btn-primary">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+@code {
+    [Parameter]
+    public Todo EditTodo { get; set; }
+
+
+
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+    string UserName;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = (await authenticationStateTask).User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            UserName = user.Identity.Name;
+
+        }
+
+    }
+    async Task Save(bool State)
+    {
+        EditTodo.IsDone = State;
+        await Save();
+    }
+    async Task Save()
+    {
+        EditTodo.CreatedDate = DateHelper.GetLocalTimeNow();
+        var res = TodoSvc.InsertData(EditTodo);
+        if (res)
+        {
+            toastService.ShowSuccess("Todo added.");
+            AppState.RefreshTodo(UserName);
+            await IJS.InvokeVoidAsync("CloseModal", "taskModal");
+        }
+        else
+        {
+            toastService.ShowError("Todo cannot be saved.");
+        }
+    }
+}

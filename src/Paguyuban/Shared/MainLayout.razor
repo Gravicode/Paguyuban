@@ -577,66 +577,10 @@
         <NoteModal NewNote="NewNote"></NoteModal>
 
         <!-- Modal 6 :: Edit Task -->
-        <div class="modal modal-lg-fullscreen fade" id="taskModal" tabindex="-1" role="dialog" aria-labelledby="taskModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-dialog-zoom">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="taskModalLabel">Edit task</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <form>
-                            <div class="form-group">
-                                <label for="editTaskName" class="col-form-label">Task name:</label>
-                                <input type="text" class="form-control" id="editTaskName" value="Dinner with friends" placeholder="Add task name here">
-                            </div>
-                            <div class="form-group">
-                                <label for="editTaskDetails" class="col-form-label">Task details:</label>
-                                <textarea class="form-control hide-scrollbar" id="editTaskDetails" rows="4" placeholder="Add task descriptions">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Omnis temporibus vel, molestiae nobis dolor aut sapiente. Vero possimus molestias consequatur quod, quo rem autem molestiae, accusantium nemo culpa eos doloremque?
-                        </textarea>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-light border" data-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-success">Finish</button>
-                        <button type="button" class="btn btn-primary">Save</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <EditTodoModal EditTodo="EditTodo"></EditTodoModal>
 
         <!-- Modal 7 :: Add Task -->
-        <div class="modal modal-lg-fullscreen fade" id="addTaskModal" tabindex="-1" role="dialog" aria-labelledby="addTaskModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-dialog-zoom">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="addTaskModalLabel">Add new task</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <form>
-                            <div class="form-group">
-                                <label for="addTaskName" class="col-form-label">Task name:</label>
-                                <input type="text" class="form-control" id="addTaskName" value="" placeholder="Add task name here">
-                            </div>
-                            <div class="form-group">
-                                <label for="addTaskDetails" class="col-form-label">Task details:</label>
-                                <textarea class="form-control hide-scrollbar" id="addTaskDetails" rows="4" placeholder="Add task descriptions"></textarea>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-light border" data-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary">Add task</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <TodoModal NewTodo="NewTodo"></TodoModal>
 
         <!-- All Modals End -->
     </CascadingValue>
@@ -653,6 +597,12 @@
 @code {
     [Parameter]
     public Note NewNote { get; set; } = new();
+    
+    [Parameter]
+    public Todo NewTodo { get; set; } = new();
+
+    [Parameter]
+    public Todo EditTodo { get; set; } = new();
 
     [Parameter]
     public bool IsTransparent { get; set; } = true;
@@ -664,6 +614,24 @@
         NavMgr.NavigateTo($"/logout", true);
         //await localStorage.SetItemAsync(AppConstants.NameKey, "");
         //NavMgr.NavigateTo($"/login");
+    }
+
+    public void SetNote(Note note)
+    {
+        NewNote = note;
+        StateHasChanged();
+    }
+    
+    public void SetTodo(Todo todo)
+    {
+        NewTodo = todo;
+        StateHasChanged();
+    } 
+    
+    public void SetEditTodo(Todo todo)
+    {
+        EditTodo = todo;
+        StateHasChanged();
     }
 
     UserProfile selUser;

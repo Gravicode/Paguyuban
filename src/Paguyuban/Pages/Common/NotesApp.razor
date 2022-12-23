@@ -1,4 +1,5 @@
 ﻿@inject UserProfileService UserSvc
+@inject NoteService NoteSvc
 @inject IToastService toastService
 @inject IJSRuntime IJS
 @inject AppState AppState
@@ -53,7 +54,7 @@
                         <div class="input-group">
                             <input type="text" @bind="Keyword" @onkeyup="KeyUp" class="form-control search border-right-0 transparent-bg pr-0" placeholder="Search notes">
                             <div class="input-group-append">
-                                <div class="input-group-text transparent-bg border-left-0" role="button">
+                                <div @onclick="LoadData" class="input-group-text transparent-bg border-left-0" role="button">
                                     <!-- Default :: Inline SVG -->
                                     <svg class="text-muted hw-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
@@ -70,7 +71,7 @@
 
                 <div class="note-container">
                     <Virtualize Items="@ListNotes" Context="item">
-                        <div @key="item.NoteId" class="note">
+                        <div @key="item.Id" class="note">
                             <div class="note-body">
                                 <div class="note-added-on">@($"{item.CreatedDate.ToString("dddd, dd/MM/yyyy")} at {item.CreatedDate.ToString("HH:mm")}")</div>
                                 <h5 class="note-title">@item.Title</h5>
@@ -140,9 +141,8 @@
     string UserName;
     string SelectedTag="All";
     private async Task Delete()
-    {
-        SelUser.Notes.Remove(itemObject);
-        var res = UserSvc.UpdateData(SelUser);
+    {   
+        var res = NoteSvc.DeleteData(itemObject);
         if (res)
         {
             await LoadData();
@@ -153,8 +153,8 @@
     } 
     private async Task Delete(Note item)
     {
-        SelUser.Notes.Remove(item);
-        var res = UserSvc.UpdateData(SelUser);
+
+        var res = NoteSvc.DeleteData(item);
         if (res)
         {
             await LoadData();
@@ -165,8 +165,10 @@
     {
 
         itemObject = new ();
-        itemObject.NoteId = Guid.NewGuid().ToString();
-        Layout.NewNote = itemObject;
+        itemObject.Id = Guid.NewGuid().ToString();
+        itemObject.Tag = "Personal";
+        itemObject.Username = SelUser.Username;
+        Layout.SetNote(itemObject);
 
     }
     async void Refresh(string username)
@@ -174,7 +176,7 @@
         if (SelUser.Username == username)
         {
             await LoadData();
-            StateHasChanged();
+            await InvokeAsync(StateHasChanged);
         }
     }
     public void Dispose()
@@ -202,7 +204,7 @@
     async Task ChangeTag(Note item, string Tag)
     {
         item.Tag = Tag;
-        var res = UserSvc.UpdateData(SelUser);
+        var res = NoteSvc.UpdateData(item);
         if (res)
         {
             await LoadData();
@@ -218,7 +220,8 @@
 
     async Task LoadData()
     {
-        IEnumerable<Note> data = SelUser.Notes.AsEnumerable();
+       
+        IEnumerable<Note> data = NoteSvc.GetByUsername(SelUser.Username);
         if (!string.IsNullOrEmpty(Keyword))
             data = data.Where(x => x.Title.Contains(Keyword));
 

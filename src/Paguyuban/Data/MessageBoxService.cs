@@ -18,9 +18,11 @@ namespace Paguyuban.Data
         RedisConnectionProvider provider;
         IRedisCollection<MessageBox> db;
         UserProfileService UserSvc;
+        ContactService ContactSvc;
 
-        public MessageBoxService(RedisConnectionProvider provider, UserProfileService userservice)
+        public MessageBoxService(RedisConnectionProvider provider, UserProfileService userservice, ContactService contactservice)
         {
+            this.ContactSvc = contactservice;
             this.UserSvc = userservice;
             this.provider = provider;
             db = this.provider.RedisCollection<MessageBox>();
@@ -82,7 +84,8 @@ namespace Paguyuban.Data
                 var messages = GetLatestMessage(username);
                 var exist_user = messages.Select(x => x.ToUsername).ToList();
                 var currentUser = UserSvc.GetItemByUsername(username);
-                var friend_usernames = currentUser?.Contacts.Where(x => !exist_user.Contains(x.User.Username)).Select(x => x.User.Username);
+                var contacts = ContactSvc.GetByUsername(username);
+                var friend_usernames = contacts.Where(x => !exist_user.Contains(x.Username)).Select(x => x.Username);
                 var friends = UserSvc.GetByUsernames(friend_usernames.ToArray());
                 var list_inbox = new List<Inbox>();
                 UserProfile usr;

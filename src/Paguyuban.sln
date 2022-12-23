@@ -13,6 +13,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Helpers", "Helpers", "{C475
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{A81F44E0-5283-4309-9562-CC0CCF9507EB}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GoogleTranslateFreeApi", "GoogleTranslateFreeApi\GoogleTranslateFreeApi.csproj", "{CE130C8A-A6E0-49ED-8EF3-BF0BC65EA6D4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,6 +33,10 @@ Global
 		{9E8FF7BA-718B-4F2C-96FB-7C4330979B22}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9E8FF7BA-718B-4F2C-96FB-7C4330979B22}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9E8FF7BA-718B-4F2C-96FB-7C4330979B22}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CE130C8A-A6E0-49ED-8EF3-BF0BC65EA6D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE130C8A-A6E0-49ED-8EF3-BF0BC65EA6D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE130C8A-A6E0-49ED-8EF3-BF0BC65EA6D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CE130C8A-A6E0-49ED-8EF3-BF0BC65EA6D4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -38,6 +44,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{66478B21-967B-4771-AA2C-43393BB9F1F3} = {A81F44E0-5283-4309-9562-CC0CCF9507EB}
 		{9E8FF7BA-718B-4F2C-96FB-7C4330979B22} = {C475383F-00DF-4B83-9252-3C31B1BD17FC}
+		{CE130C8A-A6E0-49ED-8EF3-BF0BC65EA6D4} = {C475383F-00DF-4B83-9252-3C31B1BD17FC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {24CB9E18-1BE3-4219-9CD7-00F952B3F435}

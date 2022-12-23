@@ -59,16 +59,7 @@ namespace Paguyuban.Data
         {
             return db.ToList();
         }
-        public List<Contact> GetContacts(string username)
-        {
-            var user = db.Where(x => x.Username == username).FirstOrDefault();
-            if (user != null)
-            {
-                return user.Contacts;
-            }
-            else
-                return default;
-        }
+       
    
 
         public UserProfile GetDataById(string Id)

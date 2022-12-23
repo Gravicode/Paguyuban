@@ -21,6 +21,9 @@ public class IndexCreationService
         await _provider.Connection.CreateIndexAsync(typeof(MessageBox));
         await _provider.Connection.CreateIndexAsync(typeof(GroupMessage));
         await _provider.Connection.CreateIndexAsync(typeof(Notification));
+        await _provider.Connection.CreateIndexAsync(typeof(Note));
+        await _provider.Connection.CreateIndexAsync(typeof(Todo));
+        await _provider.Connection.CreateIndexAsync(typeof(Contact));
     }
 
 }

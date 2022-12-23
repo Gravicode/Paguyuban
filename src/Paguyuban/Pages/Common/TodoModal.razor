@@ -1,0 +1,76 @@
+﻿@inject UserProfileService UserSvc
+@inject TodoService TodoSvc
+@inject IJSRuntime IJS
+@inject IToastService toastService
+@inject AppState AppState
+
+<div class="modal modal-lg-fullscreen fade" id="addTaskModal" tabindex="-1" role="dialog" aria-labelledby="addTaskModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-dialog-zoom">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addTaskModalLabel">Add new task</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label for="addTaskName" class="col-form-label">Task name:</label>
+                        <input type="text"  @bind="NewTodo.Title" class="form-control" id="addTaskName" placeholder="Add task name here">
+                    </div>
+                    <div class="form-group">
+                        <label for="addTaskDetails" class="col-form-label">Task details:</label>
+                        <textarea @bind="NewTodo.Message" class="form-control hide-scrollbar" id="addTaskDetails" rows="4" placeholder="Add task descriptions"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light border" data-dismiss="modal">Close</button>
+                <button type="button" @onclick="Save" class="btn btn-primary">Add task</button>
+            </div>
+        </div>
+    </div>
+</div>
+@code {
+    [Parameter]
+    public Todo NewTodo { get; set; }
+
+
+
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+    string UserName;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = (await authenticationStateTask).User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            UserName = user.Identity.Name;
+
+        }
+
+    }
+    async Task Save(bool State)
+    {
+        NewTodo.IsDone = State;
+        await Save();
+    }
+    async Task Save()
+    {
+        NewTodo.CreatedDate = DateHelper.GetLocalTimeNow();
+        var res = TodoSvc.InsertData(NewTodo);
+        if (res)
+        {
+            toastService.ShowSuccess("Todo added.");
+            AppState.RefreshTodo(UserName);
+            await IJS.InvokeVoidAsync("CloseModal", "addTaskModal");
+        }
+        else
+        {
+            toastService.ShowError("Todo cannot be saved.");
+        }
+    }
+}
