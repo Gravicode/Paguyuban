@@ -71,7 +71,12 @@ namespace Paguyuban.Models
         public bool IsAdded { get; set; } = false;
         public UserProfile User { get; set; }
     }
-
+    public class ContactAlphabet
+    {
+        public string Key { get; set; }
+    
+        public List<Contact> Datas { get; set; }
+    }
     public class MessageDay
     {
         public string Key { get; set; }
@@ -270,10 +275,10 @@ namespace Paguyuban.Models
         [Indexed(Sortable = true)]
         public string? Instagram { set; get; }
         [Indexed(Sortable = true)]
-        public string? LinkedIn { set; get; } 
-        
+        public string? LinkedIn { set; get; }
+
         [Indexed(Sortable = true)]
-        public UserProfile? User { set; get; }
+        public UserProfile? User { set; get; } = new();
     }
 
     [Table("group_message")]

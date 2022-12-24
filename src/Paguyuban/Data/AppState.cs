@@ -29,9 +29,9 @@
             TodoStateChanged(username);
         }
         
-        public void RefreshMessageBox(string username)
+        public void AddMessageBox(string username)
         {
-            MessageStateChanged(username);
+            MessageAdded(username);
         } 
         
         public void RefreshContact(string username)
@@ -40,7 +40,7 @@
         }
 
         private void ContactStateChanged(string username) => OnContactAdded?.Invoke(username);
-        private void MessageStateChanged(string username) => OnMessageBoxAdded?.Invoke(username);
+        private void MessageAdded(string username) => OnMessageBoxAdded?.Invoke(username);
         private void ProfileStateChanged(string username) => OnProfileChange?.Invoke(username);
         private void ChatStateChanged(string username) => OnChatChange?.Invoke(username);
         private void NoteStateChanged(string username) => OnNotesAdded.Invoke(username);

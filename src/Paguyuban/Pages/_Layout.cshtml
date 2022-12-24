@@ -81,6 +81,7 @@
         function OpenUrl(url) {
             window.location = url;
         }
+        
         function ShowModal(modalId) {
             $('#' + modalId).modal('show');
         }
@@ -89,6 +90,10 @@
         }
         function ShowInfo(message) {
             alert(message);
+        }
+
+        function CallNumber(phone){
+            window.open("tel:"+phone);
         }
         //for grid pager
         function fixGridView(tableEl) {

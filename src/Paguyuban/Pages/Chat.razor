@@ -4,6 +4,7 @@
 @inject MessageBoxService MessageSvc
 @inject MessageDetailService ChatSvc
 @inject UserProfileService UserSvc
+@inject ContactService ContactSvc
 @inject NavigationManager NavMgr
 @inject IToastService toastService
 @inject IJSRuntime IJS
@@ -552,38 +553,6 @@
                             <!-- Chat Tab Pane Title End -->
 
                             <ul class="nav flex-nowrap">
-
-                                <li class="nav-item list-inline-item mr-1">
-                                    <a class="nav-link text-muted px-1" href="#" title="Notifications" role="button" data-toggle="modal" data-target="#notificationModal">
-                                        <!-- Default :: Inline SVG -->
-                                        <svg class="hw-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                                        </svg>
-
-                                        <!-- Alternate :: External File link -->
-                                        <!-- <img src="./../assets/media/heroicons/outline/bell.svg" alt="" class="injectable hw-20"> -->
-                                    </a>
-                                </li>
-
-                                <li class="nav-item list-inline-item mr-0">
-                                    <div class="dropdown">
-                                        <a class="nav-link text-muted px-1" href="#" role="button" title="Details" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                            <!-- Default :: Inline SVG -->
-                                            <svg class="hw-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                                            </svg>
-
-                                            <!-- Alternate :: External File link -->
-                                            <!-- <img src="./../assets/media/heroicons/outline/dots-vertical.svg" alt="" class="injectable hw-20"> -->
-                                        </a>
-
-                                        <div class="dropdown-menu dropdown-menu-right">
-                                            <a class="dropdown-item" href="#" role="button" data-toggle="modal" data-target="#startConversation">New Chat</a>
-                                            <a class="dropdown-item" href="#" role="button" data-toggle="modal" data-target="#createGroup">Create Group</a>
-                                            <a class="dropdown-item" href="#" role="button" data-toggle="modal" data-target="#inviteOthers">Invite Others</a>
-                                        </div>
-                                    </div>
-                                </li>
                             </ul>
                         </div>
 
@@ -593,27 +562,18 @@
                             <!-- Sidebar Header Dropdown Start -->
                             <div class="dropdown mr-2">
                                 <!-- Dropdown Button Start -->
-                                <button class="btn btn-outline-default dropdown-toggle" type="button" data-chat-filter-list="" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    All Chats
+                                <button class="btn btn-outline-default" @onclick="SyncContact" type="button" aria-expanded="false">
+                                    Sync Contacts
                                 </button>
-                                <!-- Dropdown Button End -->
-                                <!-- Dropdown Menu Start -->
-                                <div class="dropdown-menu">
-                                    <a class="dropdown-item" data-chat-filter="" data-select="all-chats" href="#">All Chats</a>
-                                    <a class="dropdown-item" data-chat-filter="" data-select="friends" href="#">Friends</a>
-                                    <a class="dropdown-item" data-chat-filter="" data-select="groups" href="#">Groups</a>
-                                    <a class="dropdown-item" data-chat-filter="" data-select="unread" href="#">Unread</a>
-                                    <a class="dropdown-item" data-chat-filter="" data-select="archived" href="#">Archived</a>
-                                </div>
-                                <!-- Dropdown Menu End -->
+                                
                             </div>
                             <!-- Sidebar Header Dropdown End -->
                             <!-- Sidebar Search Start -->
                             <form class="form-inline">
                                 <div class="input-group">
-                                    <input type="text" class="form-control search border-right-0 transparent-bg pr-0" placeholder="Search users">
+                                    <input type="text" @onkeyup="KeyUpContact" @bind="ContactKeyword" class="form-control search border-right-0 transparent-bg pr-0" placeholder="Search users">
                                     <div class="input-group-append">
-                                        <div class="input-group-text transparent-bg border-left-0" role="button">
+                                        <div @onclick="SearchContact" class="input-group-text transparent-bg border-left-0" role="button">
                                             <!-- Default :: Inline SVG -->
                                             <svg class="text-muted hw-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -632,281 +592,41 @@
                     <!-- Chat Header End -->
                     <!-- Friends Contact List Start -->
                     <ul class="contacts-list" id="friendsTab" data-friends-list="">
-                        <!-- Item Series Start -->
-                        <li>
-                            <small class="font-weight-medium text-uppercase text-muted">A</small>
-                        </li>
-                        <!-- Item Series End -->
-                        <!-- friends Item Start -->
-                        <li class="contacts-item active">
-                            <a class="contacts-link" href="#">
-                                <div class="avatar">
-                                    <img src="./../assets/media/avatar/3.png" alt="">
-                                </div>
-                                <div class="contacts-content">
-                                    <div class="contacts-info">
-                                        <h6 class="chat-name text-truncate">Albert K. Johansen</h6>
-                                    </div>
-                                    <div class="contacts-texts">
-                                        <!-- Default :: Inline SVG -->
-                                        <svg class="hw-16 text-muted mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
-                                        </svg>
+                        @foreach (var contact in ListContact)
+                        {
+                            <!-- Item Series Start -->
+                            <li>
+                                <small class="font-weight-medium text-uppercase text-muted">@contact.Key</small>
+                            </li>
+                            <!-- Item Series End -->
+                            foreach (var item in contact.Datas)
+                            {
+                                <!-- friends Item Start -->
+                                <li class="contacts-item active">
+                                    <a class="contacts-link" @onclick="()=>SelectContact(item)" href="#">
+                                        <div class="avatar">
+                                            <img src="@(string.IsNullOrEmpty(item.User.PicUrl)?"./../assets/media/avatar/3.png":item.User.PicUrl)" alt="">
+                                        </div>
+                                        <div class="contacts-content">
+                                            <div class="contacts-info">
+                                                <h6 class="chat-name text-truncate">@item.FullName</h6>
+                                            </div>
+                                            <div class="contacts-texts">
+                                                <!-- Default :: Inline SVG -->
+                                                <svg class="hw-16 text-muted mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+                                                </svg>
 
-                                        <!-- Alternate :: External File link -->
-                                        <!-- <img class="injectable hw-16 text-muted mr-1" src="./../assets/media/heroicons/solid/location-marker.svg" alt=""> -->
-                                        <p class="text-muted mb-0">San Fransisco, CA</p>
-                                    </div>
-                                </div>
-                            </a>
-                        </li>
-                        <!-- friends Item End -->
-                        <!-- friends Item Start -->
-                        <li class="contacts-item">
-                            <a class="contacts-link" href="#">
-                                <div class="avatar">
-                                    <img src="./../assets/media/avatar/3.png" alt="">
-                                </div>
-                                <div class="contacts-content">
-                                    <div class="contacts-info">
-                                        <h6 class="chat-name text-truncate">Alice R. Botello</h6>
-                                    </div>
-                                    <div class="contacts-texts">
-                                        <!-- Default :: Inline SVG -->
-                                        <svg class="hw-16 text-muted mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
-                                        </svg>
-
-                                        <!-- Alternate :: External File link -->
-                                        <!-- <img class="injectable hw-16 text-muted mr-1" src="./../assets/media/heroicons/solid/location-marker.svg" alt=""> -->
-                                        <p class="text-muted mb-0">Brentwood, NY</p>
-                                    </div>
-                                </div>
-                            </a>
-                        </li>
-                        <!-- friends Item End -->
-                        <!-- Item Series Start -->
-                        <li>
-                            <small class="font-weight-medium text-uppercase text-muted">b</small>
-                        </li>
-                        <!-- Item Series End -->
-                        <!-- friends Item Start -->
-                        <li class="contacts-item">
-                            <a class="contacts-link" href="#">
-                                <div class="avatar">
-                                    <img src="./../assets/media/avatar/3.png" alt="">
-                                </div>
-                                <div class="contacts-content">
-                                    <div class="contacts-info">
-                                        <h6 class="chat-name text-truncate">Brittany K. Williams</h6>
-                                    </div>
-                                    <div class="contacts-texts">
-                                        <!-- Default :: Inline SVG -->
-                                        <svg class="hw-16 text-muted mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
-                                        </svg>
-
-                                        <!-- Alternate :: External File link -->
-                                        <!-- <img class="injectable hw-16 text-muted mr-1" src="./../assets/media/heroicons/solid/location-marker.svg" alt=""> -->
-                                        <p class="text-muted mb-0">Scranton, PA</p>
-                                    </div>
-                                </div>
-                            </a>
-                        </li>
-                        <!-- friends Item End -->
-                        <!-- Item Series Start -->
-                        <li>
-                            <small class="font-weight-medium text-uppercase text-muted">C</small>
-                        </li>
-                        <!-- Item Series End -->
-                        <!-- friends Item Start -->
-                        <li class="contacts-item">
-                            <a class="contacts-link" href="#">
-                                <div class="avatar">
-                                    <img src="./../assets/media/avatar/3.png" alt="">
-                                </div>
-                                <div class="contacts-content">
-                                    <div class="contacts-info">
-                                        <h6 class="chat-name text-truncate">Christopher Garcia</h6>
-                                    </div>
-                                    <div class="contacts-texts">
-                                        <!-- Default :: Inline SVG -->
-                                        <svg class="hw-16 text-muted mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
-                                        </svg>
-
-                                        <!-- Alternate :: External File link -->
-                                        <!-- <img class="injectable hw-16 text-muted mr-1" src="./../assets/media/heroicons/solid/location-marker.svg" alt=""> -->
-                                        <p class="text-muted mb-0">Riverside, CA</p>
-                                    </div>
-                                </div>
-                            </a>
-                        </li>
-                        <!-- friends Item End -->
-                        <!-- friends Item Start -->
-                        <li class="contacts-item">
-                            <a class="contacts-link" href="#">
-                                <div class="avatar">
-                                    <img src="./../assets/media/avatar/3.png" alt="">
-                                </div>
-                                <div class="contacts-content">
-                                    <div class="contacts-info">
-                                        <h6 class="chat-name text-truncate">Casey Mcbride</h6>
-                                    </div>
-                                    <div class="contacts-texts">
-                                        <!-- Default :: Inline SVG -->
-                                        <svg class="hw-16 text-muted mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
-                                        </svg>
-
-                                        <!-- Alternate :: External File link -->
-                                        <!-- <img class="injectable hw-16 text-muted mr-1" src="./../assets/media/heroicons/solid/location-marker.svg" alt=""> -->
-                                        <p class="text-muted mb-0">Zephyr, NC</p>
-                                    </div>
-                                </div>
-                            </a>
-                        </li>
-                        <!-- friends Item End -->
-                        <!-- Item Series Start -->
-                        <li>
-                            <small class="font-weight-medium text-uppercase text-muted">G</small>
-                        </li>
-                        <!-- Item Series End -->
-                        <!-- friends Item Start -->
-                        <li class="contacts-item">
-                            <a class="contacts-link" href="#">
-                                <div class="avatar">
-                                    <img src="./../assets/media/avatar/3.png" alt="">
-                                </div>
-                                <div class="contacts-content">
-                                    <div class="contacts-info">
-                                        <h6 class="chat-name text-truncate">Gemma Mendez</h6>
-                                    </div>
-                                    <div class="contacts-texts">
-                                        <!-- Default :: Inline SVG -->
-                                        <svg class="hw-16 text-muted mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
-                                        </svg>
-
-                                        <!-- Alternate :: External File link -->
-                                        <!-- <img class="injectable hw-16 text-muted mr-1" src="./../assets/media/heroicons/solid/location-marker.svg" alt=""> -->
-                                        <p class="text-muted mb-0">Frederick, MD</p>
-                                    </div>
-                                </div>
-                            </a>
-                        </li>
-                        <!-- friends Item End -->
-                        <!-- Item Series Start -->
-                        <li>
-                            <small class="font-weight-medium text-uppercase text-muted">k</small>
-                        </li>
-                        <!-- Item Series End -->
-                        <!-- friends Item Start -->
-                        <li class="contacts-item">
-                            <a class="contacts-link" href="#">
-                                <div class="avatar">
-                                    <img src="./../assets/media/avatar/3.png" alt="">
-                                </div>
-                                <div class="contacts-content">
-                                    <div class="contacts-info">
-                                        <h6 class="chat-name text-truncate">Katelyn Valdez</h6>
-                                    </div>
-                                    <div class="contacts-texts">
-                                        <!-- Default :: Inline SVG -->
-                                        <svg class="hw-16 text-muted mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
-                                        </svg>
-
-                                        <!-- Alternate :: External File link -->
-                                        <!-- <img class="injectable hw-16 text-muted mr-1" src="./../assets/media/heroicons/solid/location-marker.svg" alt=""> -->
-                                        <p class="text-muted mb-0">Jackson, TN</p>
-                                    </div>
-                                </div>
-                            </a>
-                        </li>
-                        <!-- friends Item End -->
-                        <!-- friends Item Start -->
-                        <li class="contacts-item">
-                            <a class="contacts-link" href="#">
-                                <div class="avatar">
-                                    <img src="./../assets/media/avatar/3.png" alt="">
-                                </div>
-                                <div class="contacts-content">
-                                    <div class="contacts-info">
-                                        <h6 class="chat-name text-truncate">Katherine Schneider</h6>
-                                    </div>
-                                    <div class="contacts-texts">
-                                        <!-- Default :: Inline SVG -->
-                                        <svg class="hw-16 text-muted mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
-                                        </svg>
-
-                                        <!-- Alternate :: External File link -->
-                                        <!-- <img class="injectable hw-16 text-muted mr-1" src="./../assets/media/heroicons/solid/location-marker.svg" alt=""> -->
-                                        <p class="text-muted mb-0">Saginaw, MI</p>
-                                    </div>
-                                </div>
-                            </a>
-                        </li>
-                        <!-- friends Item End -->
-                        <!-- Item Series Start -->
-                        <li>
-                            <small class="font-weight-medium text-uppercase text-muted">m</small>
-                        </li>
-                        <!-- Item Series End -->
-                        <!-- friends Item Start -->
-                        <li class="contacts-item">
-                            <a class="contacts-link" href="#">
-                                <div class="avatar">
-                                    <img src="./../assets/media/avatar/3.png" alt="">
-                                </div>
-                                <div class="contacts-content">
-                                    <div class="contacts-info">
-                                        <h6 class="chat-name text-truncate">Maizie Edwards</h6>
-                                    </div>
-                                    <div class="contacts-texts">
-                                        <!-- Default :: Inline SVG -->
-                                        <svg class="hw-16 text-muted mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
-                                        </svg>
-
-                                        <!-- Alternate :: External File link -->
-                                        <!-- <img class="injectable hw-16 text-muted mr-1" src="./../assets/media/heroicons/solid/location-marker.svg" alt=""> -->
-                                        <p class="text-muted mb-0">Greensboro, NC</p>
-                                    </div>
-                                </div>
-                            </a>
-                        </li>
-                        <!-- friends Item End -->
-                        <!-- Item Series Start -->
-                        <li>
-                            <small class="font-weight-medium text-uppercase text-muted">s</small>
-                        </li>
-                        <!-- Item Series End -->
-                        <!-- friends Item Start -->
-                        <li class="contacts-item">
-                            <a class="contacts-link" href="#">
-                                <div class="avatar">
-                                    <img src="./../assets/media/avatar/3.png" alt="">
-                                </div>
-                                <div class="contacts-content">
-                                    <div class="contacts-info">
-                                        <h6 class="chat-name text-truncate">Susan K. Taylor</h6>
-                                    </div>
-                                    <div class="contacts-texts">
-                                        <!-- Default :: Inline SVG -->
-                                        <svg class="hw-16 text-muted mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
-                                        </svg>
-
-                                        <!-- Alternate :: External File link -->
-                                        <!-- <img class="injectable hw-16 text-muted mr-1" src="./../assets/media/heroicons/solid/location-marker.svg" alt=""> -->
-                                        <p class="text-muted mb-0">Centerville, VA</p>
-                                    </div>
-                                </div>
-                            </a>
-                        </li>
-                        <!-- friends Item End -->
+                                                <!-- Alternate :: External File link -->
+                                                <!-- <img class="injectable hw-16 text-muted mr-1" src="./../assets/media/heroicons/solid/location-marker.svg" alt=""> -->
+                                                <p class="text-muted mb-0">@item.Address</p>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <!-- friends Item End -->
+                            }
+                        }
 
                     </ul>
                     <!-- Friends Contact List End -->
@@ -970,9 +690,11 @@
 
                             <div class="media-body align-self-center ">
                                 <h6 class="text-truncate mb-0">@CurrentMessage.User.FullName</h6>
-                                <small class="text-muted">@(
-                            CurrentMessage.User.Aktif ? "Online" : "Offline"
-                            )</small>
+                                <small class="text-muted">
+                                    @(
+                                        CurrentMessage.User.Aktif ? "Online" : "Offline"
+                                        )
+                                </small>
                             </div>
                         </div>
 
@@ -1225,9 +947,11 @@
                                                 <div class="message-options">
                                                     <div class="avatar avatar-sm"><img alt="" src="@(string.IsNullOrEmpty(item.FromUser.PicUrl)?"./../assets/media/avatar/6.png":item.FromUser.PicUrl)"></div>
 
-                                                    <span class="message-date">@(
-                                    DateHelper.GetElapsedTime(item.CreatedDate)
-                                    )</span>
+                                                    <span class="message-date">
+                                                        @(
+                                                            DateHelper.GetElapsedTime(item.CreatedDate)
+                                                            )
+                                                    </span>
 
                                                     <div class="dropdown">
                                                         <a class="text-muted" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -1318,9 +1042,11 @@
                                                 </div>
                                                 <div class="message-options">
                                                     <div class="avatar avatar-sm"><img alt="" src="@(string.IsNullOrEmpty(item.FromUser.PicUrl)?"./../assets/media/avatar/6.png":item.FromUser.PicUrl)"></div>
-                                                    <span class="message-date">@(
-                                    DateHelper.GetElapsedTime(item.CreatedDate)
-                                    )</span>
+                                                    <span class="message-date">
+                                                        @(
+                                                            DateHelper.GetElapsedTime(item.CreatedDate)
+                                                            )
+                                                    </span>
                                                     <div class="dropdown">
                                                         <a class="text-muted" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                                             <!-- Default :: Inline SVG -->
@@ -1833,7 +1559,7 @@
     <CallsPage></CallsPage>
     <!-- Call Log Page End -->
     <!-- Friends Page Start -->
-    <FriendsPage></FriendsPage>
+    <FriendsPage SelectedContact="SelectedContact"></FriendsPage>
     <!-- Friends Page End -->
     <!-- Profile Settings Start -->
     <SettingPage></SettingPage>
@@ -1843,7 +1569,9 @@
 </main>
 <!-- Main End -->
 @code {
-
+    public List<ContactAlphabet> ListContact { set; get; } = new();
+    public Contact SelectedContact { set; get; } 
+    string ContactKeyword;
     bool FirstLoad = true;
     public string SearchFilter { get; set; } = "All";
     string GetStyle(Inbox item)
@@ -1884,6 +1612,20 @@
         SearchFilter = Filter;
         Search();
     }
+    async Task SelectContact(Contact item)
+    {
+        SelectedContact = item;
+        StateHasChanged();
+    }
+    void SearchContact()
+    {
+        ListContact = ContactSvc.FindByKeywordAlphabet(ContactKeyword, UserName);
+        if (SelectedContact==null)
+        {
+            SelectedContact = ListContact.Count > 0 ? ListContact.FirstOrDefault().Datas.FirstOrDefault() : new();
+        }
+    }
+
     async void AddMessageBox(string tousername)
     {
         var ToUser = UserSvc.GetItemByUsername(tousername);
@@ -1999,6 +1741,7 @@
             if (SelUser == null) SelUser = new();
             IsLogin = true;
             Search();
+            SearchContact();
         }
         AppState.OnMessageBoxAdded += AddMessageBox;
     }
@@ -2019,18 +1762,19 @@
         //NavMgr.NavigateTo($"/profile/{Uri.EscapeDataString(username)}");
     }
     bool IsReload = false;
-    async void ReloadJs(){
+    async void ReloadJs()
+    {
         if (!IsReload)
         {
             IsReload = true;
-            await IJS.InvokeVoidAsync("InitApp");
+            await IJS.InvokeVoidAsync("InitApp2");
         }
     }
 
     async Task SelectMessage(Inbox selItem)
     {
-       
-        FirstLoad= false;
+
+        FirstLoad = false;
         if (!string.IsNullOrEmpty(selItem.Message.Id))
         {
             //MessageSvc.RefreshEntity(selItem.Message);
@@ -2038,9 +1782,9 @@
         CurrentMessage = selItem;
         CurrentMessage.Message.IsRead = true;
         await ReloadCurrentChat();
-        
-        
-       
+
+
+
     }
     private async Task PrepareForDelete(Inbox item)
     {
@@ -2065,6 +1809,14 @@
         if (e.Key == "Enter")
         {
             Search();
+        }
+    }
+    async Task KeyUpContact(KeyboardEventArgs e)
+    {
+
+        if (e.Key == "Enter")
+        {
+            SearchContact();
         }
     }
     async Task KeyUpMessage(KeyboardEventArgs e)
@@ -2240,6 +1992,7 @@
     {
         Messages = MessageSvc.LoadInbox(UserName);
         if (Messages == null) Messages = new();
+        /*
         if (!string.IsNullOrEmpty(ToUserName) && !Messages.Any(x => x.User.Username == ToUserName))
         {
             var people = UserSvc.GetItemByUsername(ToUserName);
@@ -2247,7 +2000,7 @@
             {
                 Messages.Add(new Inbox() { Message = new(), User = people });
             }
-        }
+        }*/
         switch (SearchFilter)
         {
             case "Groups":
@@ -2285,9 +2038,38 @@
             InfoUser = UserSvc.GetItemByUsername(CurrentMessage.User.Username);
             //IJS.InvokeVoidAsync("ShowModal", "chat-info-modal");
         }
-    }protected override void OnAfterRender(bool firstRender)
+    }
+
+    async Task SyncContact()
     {
-        if(CurrentMessage!=null)
-           ReloadJs();
+        var counter = 0;
+        foreach(var item in ListContact)
+        {
+            foreach(var contact in item.Datas)
+            {
+                var syncItem = UserSvc.GetItemByUsername(contact.User.Username);
+                contact.Address = syncItem.Address;
+                contact.BirthDate = syncItem.BirthDate;
+                contact.Email = syncItem.Email;
+                contact.Facebook = syncItem.Facebook;
+                contact.FullName = syncItem.FullName;
+                contact.Instagram = syncItem.Instagram;
+                contact.LinkedIn = syncItem.LinkedIn;
+                contact.Phone = syncItem.Phone;
+                contact.Twitter = syncItem.Twitter;
+                contact.Username = SelUser.Username;
+                contact.Website = syncItem.Website;
+                contact.User = syncItem;
+                var  res =ContactSvc.UpdateData(contact);
+                if (res) counter++;
+            }
+        }
+        toastService.ShowSuccess($"{counter} items sync successfully.");
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (CurrentMessage != null)
+            ReloadJs();
     }
 }

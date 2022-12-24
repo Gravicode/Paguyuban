@@ -125,7 +125,7 @@
     {
         if (item != null)
         {
-            AppState.RefreshMessageBox(item.User.Username);
+            AppState.AddMessageBox(item.User.Username);
             await IJS.InvokeVoidAsync("CloseModal", "startConversation");
         }
 

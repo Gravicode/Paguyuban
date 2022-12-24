@@ -182,4 +182,63 @@ function InitApp() {
 
 }
 
+function InitApp2() {
+   
 
+    $('.contacts-list .contacts-link').on('click', function () {
+        $(".main").addClass("main-visible");
+    })
+    $('.contacts-list .media-link').on('click', function () {
+        $(".main").addClass("main-visible");
+    })
+    $('[data-profile-edit]').on('click', function () {
+        $(".main").addClass("main-visible");
+    })
+
+    // Toggle chat
+    $('[data-close]').on('click', function (e) {
+        e.preventDefault()
+        $(".main").removeClass("main-visible");
+    })
+
+    //Popup Gallery
+    $('.chat-content').magnificPopup({
+        delegate: 'a.popup-media',
+        type: 'image',
+        gallery: {
+            enabled: true,
+            navigateByImgClick: true,
+            preload: [0, 1] // Will preload 0 - before current, and 1 after the current image
+        }
+    });
+
+    //Chat Dropdown Filter
+    $('[data-chat-filter]').on('click', function () {
+        let selectedOption = $(this).data('select');
+        $('[data-chat-filter-list]').text($(this).text());
+        if (selectedOption === 'all-chats') {
+            $('[data-chat-list]').find('li').each(function () {
+                $(this).show();
+            });
+        } else {
+            $('[data-chat-list]').find('li').each(function () {
+                $(this).hide();
+            });
+            $('[data-chat-list] li.' + selectedOption).show();
+        }
+    });
+
+    //Chat Info
+    $('[data-chat-info-toggle]').on('click', function (e) {
+        e.preventDefault()
+        $(".chat-info").addClass("chat-info-visible");
+    })
+    $('[data-chat-info-close]').on('click', function (e) {
+        e.preventDefault()
+        $(".chat-info").removeClass("chat-info-visible");
+    })
+}
+
+function CloseMain() {
+    $(".main").removeClass("main-visible");
+}

@@ -53,13 +53,28 @@ namespace Paguyuban.Data
         {
             var data = db.Where(x => x.FullName.Contains(Keyword) || x.Email.Contains(Keyword) || x.Phone.Contains(Keyword));
             return data.ToList();
-        } 
+        }
+        
+      
         
         public List<Contact> FindByKeyword(string Keyword,string Username)
         {
             var data = string.IsNullOrEmpty(Keyword) ? db.Where(x => x.Username == Username) : db.Where(x => (x.FullName.Contains(Keyword) || x.Email.Contains(Keyword) || x.Phone.Contains(Keyword)) && x.Username == Username);
             return data.ToList();
         }
+        public List<ContactAlphabet> FindByKeywordAlphabet(string Keyword, string Username)
+        {
+            var data = string.IsNullOrEmpty(Keyword) ? db.Where(x => x.Username == Username).ToList() : db.Where(x => (x.FullName.Contains(Keyword) || x.Email.Contains(Keyword) || x.Phone.Contains(Keyword)) && x.Username == Username).ToList();
+
+            var ListContact = data.GroupBy(x => x.FullName.Substring(0, 1).ToUpper()).Select(y => new ContactAlphabet()
+            {
+                Key = y.Key,
+                Datas = y.ToList()
+            }
+        ).ToList();
+            return ListContact;
+        }
+
 
         public List<Contact> GetAllData()
         {

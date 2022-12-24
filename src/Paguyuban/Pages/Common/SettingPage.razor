@@ -5,6 +5,7 @@
 @inject NavigationManager NavMgr
 @inject AzureBlobHelper AzureBlobHelper
 @inject IToastService toastService
+@inject IJSRuntime IJS
 @inject Blazored.LocalStorage.ILocalStorageService localStorage
 @inject UserProfileService service
 @inject AppState AppState
@@ -379,7 +380,8 @@
 
     async Task LogOut()
     {
-        NavMgr.NavigateTo("/logout");
+        await IJS.InvokeVoidAsync("OpenUrl","/logout");
+        // NavMgr.NavigateTo("/logout");
     }
     void Simpan()
     {
