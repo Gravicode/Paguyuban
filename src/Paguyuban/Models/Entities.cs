@@ -12,6 +12,59 @@ using System.Runtime.CompilerServices;
 namespace Paguyuban.Models
 {
     #region helpers model
+    public class ChatGroupTypes
+    {
+        public const string Public = "Public";
+        public const string Private = "Private";
+    }
+    public class FileTypes
+    {
+        public const string Image = "Image";
+        public const string Audio = "Audio";
+        public const string Video = "Video";
+        public const string Docs = "Doc";
+        public const string Location = "Location";
+        public const string Contact = "Contact";
+        public const string Other = "Other";
+
+        public static string GetFileType(string Filename)
+        {
+            var ext = Path.GetExtension(Filename);
+            switch (ext.ToLower())
+            {
+                case ".docx":
+                case ".doc":
+                case ".xlsx":
+                case ".xls":
+                case ".pptx":
+                case ".ppt":
+                case ".pdf":
+                case ".rtf":
+                case ".txt":
+                    return FileTypes.Docs;
+                case ".mp3":
+                case ".flac":
+                case ".wav":
+                case ".midi":
+                case ".aac":
+                    return FileTypes.Audio;
+                case ".mp4":
+                case ".avi":
+                case ".mpg":
+                case ".3gp":
+                case ".wmv":
+                    return FileTypes.Video;
+                case ".jpg":
+                case ".jpeg":
+                case ".gif":
+                case ".bmp":
+                case ".png":
+                    return FileTypes.Image;
+                default:
+                    return FileTypes.Other;
+            }
+        }
+    }
     public class TodoDay
     {
         public string Key { get; set; }
@@ -69,6 +122,7 @@ namespace Paguyuban.Models
     {
         public UserProfile User { get; set; }
         public MessageBox Message { get; set; }
+        public List<MessageDetail> Chats { get; set; }
 
     }
     #endregion
@@ -110,16 +164,39 @@ namespace Paguyuban.Models
         public bool IsMuted { set; get; } = false;
         [Indexed]
         public bool IsBlocked { set; get; } = false;
-        public List<MessageDetail> Chats { get; set; } = new();
+        [Indexed]
+        public string? PicGroupUrl { set; get; }
+        [Indexed]
+        public string? GroupType { set; get; }
+        [Indexed]
+        public string[] GroupMembers { set; get; } = new string[0];
+
+        [Indexed]
+        public int UnreadCount { get; set; } = 0;
+
+        //public List<MessageDetail> Chats { get; set; } = new();
     }
+    [Document(StorageType = StorageType.Json)]
     public class MessageDetail
     {
+        [RedisIdField][Indexed] public string Id { get; set; }
+        [Indexed(Sortable = true)]
+        public string Uid { get; set; }
+        [Indexed(Sortable = true)]
+        public string Username { get; set; }
+        [Indexed]
         public UserProfile FromUser { set; get; }
+        [Indexed]
         public DateTime CreatedDate { set; get; }
         [Indexed]
         public string Message { set; get; }
+        [Indexed]
         public bool HasAttachment { get; set; } = false;
-        public List<MessageAttachment> Attachments { get; set; } = new();
+        [Indexed]
+        public MessageAttachment? Attachments { get; set; }
+
+        [Indexed]
+        public bool IsRead { get; set; } = false;
 
     }
     public class MessageAttachment
@@ -128,6 +205,16 @@ namespace Paguyuban.Models
         public string Title { set; get; }
         [Indexed]
         public string? Url { set; get; }
+        [Indexed]
+        public float? FileSize { get; set; }
+        [Indexed]
+        public string? Extension { get; set; }
+        [Indexed]
+        public string FileType { get; set; }
+        [Indexed]
+        public string? Phone { get; set; }
+        [Indexed]
+        public string? Email { get; set; }
         [Indexed]
         public string? Desc { set; get; }
         public string? Longitude { set; get; }

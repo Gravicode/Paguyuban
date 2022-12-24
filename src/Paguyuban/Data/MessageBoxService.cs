@@ -19,9 +19,11 @@ namespace Paguyuban.Data
         IRedisCollection<MessageBox> db;
         UserProfileService UserSvc;
         ContactService ContactSvc;
+        MessageDetailService ChatSvc;
 
-        public MessageBoxService(RedisConnectionProvider provider, UserProfileService userservice, ContactService contactservice)
+        public MessageBoxService(RedisConnectionProvider provider, UserProfileService userservice, ContactService contactservice,MessageDetailService ChatSvc)
         {
+            this.ChatSvc = ChatSvc;
             this.ContactSvc = contactservice;
             this.UserSvc = userservice;
             this.provider = provider;
@@ -44,8 +46,9 @@ namespace Paguyuban.Data
         }
         public bool DeleteData(MessageBox item)
         {
+            var res = ChatSvc.DeleteDataByUid(item.Uid, item.Username);
             db.Delete(item);
-            return true;
+            return res;
         }
 
         public int GetUnreadMessageByUser(string username)
@@ -91,12 +94,14 @@ namespace Paguyuban.Data
                 UserProfile usr;
                 foreach (var item in messages)
                 {
-                    list_inbox.Add(new Inbox() { Message = item, User = UserSvc.GetItemByUsername(item.ToUsername) });
+                    var chats = ChatSvc.GetByUid(item.Uid,item.Username);
+                    list_inbox.Add(new Inbox() { Message = item, User = UserSvc.GetItemByUsername(item.ToUsername), Chats = chats==null?new(): chats });
                 }
+                /*
                 foreach (var friend in friends)
                 {
-                    list_inbox.Add(new Inbox() { Message = new() { }, User = friend });
-                }
+                    list_inbox.Add(new Inbox() { Message = new() { }, User = friend , Chats = new() });
+                }*/
                 return list_inbox;
             }
             catch (Exception ex)
