@@ -178,7 +178,7 @@ function InitApp() {
 
 
     // Emojione Area
-    $("#messageInput").emojioneArea();
+    //$("#messageInput").emojioneArea();
 
 }
 
