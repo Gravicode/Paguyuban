@@ -68,7 +68,8 @@ namespace Paguyuban.Data
         
         public List<MessageDetail> GetByUid(string Uid,string Username)
         {
-            return db.Where(x=>x.Uid==Uid && x.Username==Username).OrderBy(x=>x.CreatedDate).ToList();
+            var datas = db.Where(x=>x.Uid==Uid && x.Username==Username).ToList();
+            return datas == null ? new() : datas.OrderBy(x => x.CreatedDate).ToList();
         }
 
         public MessageDetail GetDataById(string Id)

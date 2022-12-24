@@ -54,6 +54,7 @@
     <script src="assets/vendors/magnific-popup/jquery.magnific-popup.min.js"></script>
     <script src="assets/vendors/svg-inject/svg-inject.min.js"></script>
     <script src="assets/vendors/modal-stepes/modal-steps.min.js"></script>
+    <script src="assets/vendors/emojione/emojionearea.min.js"></script>
     <script src="assets/js/app.js"></script>
     
     <script type="module" src="js/webcam.js"></script>
@@ -122,6 +123,14 @@
             $(".table_container").scroll(function () {
                 var topPosition = $(".table_container").scrollTop();
                 $(table + " thead tr th").css({ "top": (topPosition) });
+            });
+        }
+
+        function ChatScrollToEnd(){
+                 // Scroll to end of chat
+            $('.chat-finished').scrollIntoView({
+                block: 'end',               // "start" | "center" | "end" | "nearest",
+                behavior: 'auto'          //"auto"  | "instant" | "smooth",
             });
         }
     </script>

@@ -13,7 +13,7 @@ namespace Paguyuban.Pages
             await HttpContext
                 .SignOutAsync(
                 CookieAuthenticationDefaults.AuthenticationScheme);
-            return LocalRedirect(Url.Content("/"));
+            return LocalRedirect(Url.Content("/sign-in"));
         }
     }
 }

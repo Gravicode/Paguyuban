@@ -48,6 +48,14 @@ namespace Paguyuban.Data
             var data = db.Where(x => x.Username.Contains(Keyword));
             return data.ToList();
         }
+        
+        public List<AddContactCls> SearchByPhoneEmail(string Keyword,string Username)
+        {
+            var data = db.Where(x => (x.Phone.Contains(Keyword) || x.Email.Contains(Keyword)) && x.Username!=Username).ToList();
+            var items = new List<AddContactCls>();
+            data.ForEach(x => items.Add(new AddContactCls() { User = x, IsAdded=false }));
+            return items;
+        }
 
         public string GetProfilePic(string UserId)
         {

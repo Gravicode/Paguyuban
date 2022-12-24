@@ -88,8 +88,8 @@ namespace Paguyuban.Data
                 var exist_user = messages.Select(x => x.ToUsername).ToList();
                 var currentUser = UserSvc.GetItemByUsername(username);
                 var contacts = ContactSvc.GetByUsername(username);
-                var friend_usernames = contacts.Where(x => !exist_user.Contains(x.Username)).Select(x => x.Username);
-                var friends = UserSvc.GetByUsernames(friend_usernames.ToArray());
+                //var friend_usernames = contacts.Where(x => !exist_user.Contains(x.Username)).Select(x => x.Username);
+                //var friends = UserSvc.GetByUsernames(friend_usernames.ToArray());
                 var list_inbox = new List<Inbox>();
                 UserProfile usr;
                 foreach (var item in messages)

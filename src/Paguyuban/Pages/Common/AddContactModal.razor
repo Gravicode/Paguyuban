@@ -1,0 +1,147 @@
+﻿@using Paguyuban.Tools;
+@inject IJSRuntime IJS
+@inject IToastService toastService
+@inject UserProfileService UserSvc
+@inject ContactService ContactSvc
+@inject AppState AppState
+
+<div class="modal modal-lg-fullscreen fade" id="addContact" tabindex="-1" role="dialog" aria-labelledby="addContactLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-dialog-zoom">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="inviteOthersLabel">Add Contact by Email or Phone</h5>
+
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body hide-scrollbar">
+                <form>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label for="inviteEmailAddress">Type Email address or Phone Number then Enter</label>
+                                <input type="text" @bind="Keyword" class="form-control form-control-md" id="inviteEmailAddress" placeholder="Type email address/phone here">
+                                <span class="pull-right">
+                                    <button type="button" class="btn btn-success btn-small mt-1" @onclick="Search" name="search">Search</button>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="form-group">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Add</th>
+                                                <th>Pic</th>
+                                                <th>Nama</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var item in ListNewContact)
+                                            {
+                                                <tr>
+                                                    <td><input type="checkbox" @bind="item.IsAdded" value="Pilih"></td>
+                                                    <td><img height="30" src="@(string.IsNullOrEmpty(item.User.PicUrl)?"./../assets/media/avatar/2.png":item.User.PicUrl)" alt=""></td>
+                                                    <td>@item.User.FullName</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-group">
+                                <p>@($"{ListNewContact.Count} accounts found")</p>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-link text-muted" data-dismiss="modal">Close</button>
+                <button type="button" @onclick="AddContact" class="btn btn-primary">Add Contacts</button>
+            </div>
+        </div>
+    </div>
+</div>
+@code {
+    public List<AddContactCls> ListNewContact { get; set; } = new();
+    public List<Contact> MyContacts { get; set; } = new();
+    string Keyword;
+    UserProfile SelUser = new UserProfile();
+
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+    string UserName;
+    async Task KeyUp(KeyboardEventArgs e)
+    {
+
+        if (e.Key == "Enter")
+        {
+            Search();
+        }
+    }
+
+    void Search()
+    {
+        if (string.IsNullOrEmpty(Keyword))
+        {
+            toastService.ShowWarning("Silakan isi email/phone dulu.");
+            return;
+        }
+        ListNewContact = UserSvc.SearchByPhoneEmail(Keyword, SelUser.Username);
+        //filtered by my contacts
+        ListNewContact = ListNewContact.Where(x => !MyContacts.Any(y => y.Email == x.User.Email)).ToList();
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        var user = (await authenticationStateTask).User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            UserName = user.Identity.Name;
+            SelUser = UserSvc.GetItemByUsername(UserName);
+            LoadContacts();
+        }
+
+
+
+    }
+
+    void LoadContacts()
+    {
+        MyContacts = ContactSvc.GetByUsername(UserName);
+    }
+    async Task AddContact()
+    {
+        bool IsSuccess = false;
+
+        foreach (var item in ListNewContact)
+        {
+            var count = 0;
+            if (item.IsAdded)
+            {
+                var newItem = new Contact() { Address = item.User.Address, BirthDate = item.User.BirthDate, Email = item.User.Email, Facebook = item.User.Facebook, FullName = item.User.FullName, Instagram = item.User.Instagram, LinkedIn = item.User.LinkedIn, Phone = item.User.Phone, Twitter = item.User.Twitter, Username = SelUser.Username, Website = item.User.Website, User = item.User };
+                var res = ContactSvc.InsertData(newItem);
+                if (res)
+                {
+                    count++;
+                }
+            }
+            toastService.ShowSuccess($"{count} contacts added.");
+            if (count > 0)
+            {
+                LoadContacts();
+                Search();
+                AppState.RefreshContact(SelUser.Username);
+            }
+            //IJS.InvokeVoidAsync("CloseModal", "addContact");
+        }
+
+    }
+}

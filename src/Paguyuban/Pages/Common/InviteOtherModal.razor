@@ -1,8 +1,13 @@
-﻿<div class="modal modal-lg-fullscreen fade" id="inviteOthers" tabindex="-1" role="dialog" aria-labelledby="inviteOthersLabel" aria-hidden="true">
+﻿@using Paguyuban.Tools;
+@inject IJSRuntime IJS
+@inject IToastService toastService
+@inject UserProfileService svc
+
+<div class="modal modal-lg-fullscreen fade" id="inviteOthers" tabindex="-1" role="dialog" aria-labelledby="inviteOthersLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-dialog-zoom">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="inviteOthersLabel">Invite Others</h5>
+                <h5 class="modal-title" id="inviteOthersLabel">Invite Others via Email or Phone</h5>
 
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
@@ -14,13 +19,19 @@
                         <div class="col-12">
                             <div class="form-group">
                                 <label for="inviteEmailAddress">Email address</label>
-                                <input type="email" class="form-control form-control-md" id="inviteEmailAddress" placeholder="Type email address here" value="">
+                                <input type="email" @bind="Email" class="form-control form-control-md" id="inviteEmailAddress" placeholder="Type email address here">
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label for="phone">Phone</label>
+                                <input type="tel" @bind="Phone" class="form-control form-control-md" id="phone" placeholder="Type phone number here">
                             </div>
                         </div>
                         <div class="col-12">
                             <div class="form-group">
                                 <label for="inviteMessage">Invitation message</label>
-                                <textarea class="form-control form-control-md no-resize hide-scrollbar" id="inviteMessage" placeholder="Write your message here" rows="3"></textarea>
+                                <textarea @bind="Message" class="form-control form-control-md no-resize hide-scrollbar" id="inviteMessage" placeholder="Write your message here" rows="3"></textarea>
                             </div>
                         </div>
                     </div>
@@ -29,11 +40,66 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-link text-muted" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Send Invitation</button>
+                <button type="button" @onclick="Send" class="btn btn-primary">Send Invitation</button>
             </div>
         </div>
     </div>
 </div>
 @code {
+    string Message;
+    string Phone;
+    string Email;
+    UserProfile SelUser = new UserProfile();
 
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+    string UserName;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = (await authenticationStateTask).User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            UserName = user.Identity.Name;
+            SelUser = svc.GetItemByUsername(UserName);
+            Message = $"Hi, Paguyuban is the new modern instant messenger, join us now >> https://paguyuban.my.id. Invited by: {SelUser?.FullName}";
+        }
+
+
+        
+    }
+    async Task Send()
+    {
+        bool IsSuccess = false;
+
+
+        string Error = string.Empty;
+
+        if (string.IsNullOrEmpty(Email) && string.IsNullOrEmpty(Phone))
+        {
+            toastService.ShowError("Email atau no hp harus di isi.");
+            return;
+        }
+        if (!string.IsNullOrEmpty(Email))
+        {
+
+
+            await MailService.PostmarkSendEmail("Paguyuban - Invite to join Paguyuban", Message, Email, false);
+            toastService.ShowSuccess("Undangan sudah di kirim ke email.");
+            IsSuccess = true;
+
+        }
+
+        if (!string.IsNullOrEmpty(Phone))
+        {
+
+            await SmsService.SendSms($"Paguyuban - Invite to join Paguyuban: {Message}", Phone);
+            toastService.ShowSuccess("Undangan sudah di kirim ke hp");
+            IsSuccess = true;
+
+
+        }
+
+    }
 }

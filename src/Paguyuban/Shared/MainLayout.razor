@@ -43,7 +43,10 @@
         <EditTodoModal EditTodo="EditTodo"></EditTodoModal>
 
         <!-- Modal 7 :: Add Task -->
-        <TodoModal NewTodo="NewTodo"></TodoModal>
+        <TodoModal NewTodo="NewTodo"></TodoModal> 
+        
+        <!-- Modal 7 :: Add Task -->
+        <AddContactModal></AddContactModal>
 
         <!-- All Modals End -->
     </CascadingValue>
@@ -137,6 +140,7 @@
         if (firstRender)
         {
             IJS.InvokeVoidAsync("InitApp");
+            IJS.InvokeVoidAsync("ChatScrollToEnd");
         }
     }
 }

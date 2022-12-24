@@ -51,7 +51,13 @@ namespace Paguyuban.Data
 
         public List<Contact> FindByKeyword(string Keyword)
         {
-            var data = db.Where(x => x.FullName.Contains(Keyword));
+            var data = db.Where(x => x.FullName.Contains(Keyword) || x.Email.Contains(Keyword) || x.Phone.Contains(Keyword));
+            return data.ToList();
+        } 
+        
+        public List<Contact> FindByKeyword(string Keyword,string Username)
+        {
+            var data = string.IsNullOrEmpty(Keyword) ? db.Where(x => x.Username == Username) : db.Where(x => (x.FullName.Contains(Keyword) || x.Email.Contains(Keyword) || x.Phone.Contains(Keyword)) && x.Username == Username);
             return data.ToList();
         }
 

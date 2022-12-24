@@ -7,6 +7,8 @@
         public event Action<string> OnChatChange;
         public event Action<string> OnNotesAdded;
         public event Action<string> OnTodosAdded;
+        public event Action<string> OnMessageBoxAdded;
+        public event Action<string> OnContactAdded;
 
         public void RefreshProfile(string username)
         {            
@@ -26,7 +28,19 @@
         {
             TodoStateChanged(username);
         }
+        
+        public void RefreshMessageBox(string username)
+        {
+            MessageStateChanged(username);
+        } 
+        
+        public void RefreshContact(string username)
+        {
+            ContactStateChanged(username);
+        }
 
+        private void ContactStateChanged(string username) => OnContactAdded?.Invoke(username);
+        private void MessageStateChanged(string username) => OnMessageBoxAdded?.Invoke(username);
         private void ProfileStateChanged(string username) => OnProfileChange?.Invoke(username);
         private void ChatStateChanged(string username) => OnChatChange?.Invoke(username);
         private void NoteStateChanged(string username) => OnNotesAdded.Invoke(username);
