@@ -120,7 +120,7 @@ builder.Services.AddTransient<StorageObjectService>();
 
 builder.Services.AddSignalR(hubOptions =>
 {
-    hubOptions.MaximumReceiveMessageSize = 128 * 1024; // 1MB
+    hubOptions.MaximumReceiveMessageSize = 5 * 128 * 1024; // 1MB
 });
 
 
