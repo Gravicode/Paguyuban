@@ -239,6 +239,8 @@ function InitApp2() {
     })
 }
 
-function CloseMain() {
-    $(".main").removeClass("main-visible");
+function GotoChat() {
+    //e.preventDefault()
+    $("body").removeClass("calls-tab-open friends-tab-open profile-tab-open");
+    $("body").addClass("chats-tab-open");
 }

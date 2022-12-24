@@ -211,16 +211,19 @@
 </div>
 @code {
     [Parameter]
-    public Contact SelectedContact { get; set; } 
+    public Contact SelectedContact { get; set; }
 
     async Task OpenChat()
     {
-        if (string.IsNullOrEmpty(SelectedContact.User.Username)){
+        if (string.IsNullOrEmpty(SelectedContact.User.Username))
+        {
             toastService.ShowWarning("Please select contact first.");
             return;
         }
         AppState.AddMessageBox(SelectedContact.User.Username);
-        await IJS.InvokeVoidAsync("CloseMain");
+        //await IJS.InvokeVoidAsync("OpenUrl", "/#chats-content");
+        await IJS.InvokeVoidAsync("GotoChat");
+        //NavMgr.NavigateTo("/Chat");
         //NavMgr.NavigateTo($"/Chat/{Uri.EscapeDataString(SelectedContact.Username)}");
     }
 
