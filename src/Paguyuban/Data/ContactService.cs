@@ -73,8 +73,9 @@ namespace Paguyuban.Data
             }
         ).ToList();
             return ListContact;
-        }
-
+        } 
+        
+       
 
         public List<Contact> GetAllData()
         {

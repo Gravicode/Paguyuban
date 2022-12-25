@@ -52,6 +52,7 @@ builder.Services.AddTransient<NoteService>();
 builder.Services.AddTransient<TodoService>();
 builder.Services.AddTransient<ContactService>();
 builder.Services.AddTransient<MessageDetailService>();
+builder.Services.AddTransient<CallLogService>();
 builder.Services.AddSingleton<AppState>();
 
 builder.Services.AddCors(options =>

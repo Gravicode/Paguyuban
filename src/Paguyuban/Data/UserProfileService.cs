@@ -51,9 +51,11 @@ namespace Paguyuban.Data
         
         public List<AddContactCls> SearchByPhoneEmail(string Keyword,string Username)
         {
-            var data = db.Where(x => (x.Phone.Contains(Keyword) || x.Email.Contains(Keyword)) && x.Username!=Username).ToList();
+            //there is bug on redis om, so we convert all items to list first
+            var data = db.ToList().Where(x => (x.Phone.Contains(Keyword) || x.Email.Contains(Keyword)) && x.Username!=Username);
             var items = new List<AddContactCls>();
-            data.ForEach(x => items.Add(new AddContactCls() { User = x, IsAdded=false }));
+            foreach (var x in data)
+            { items.Add(new AddContactCls() { User = x, IsAdded = false }); }
             return items;
         }
 

@@ -244,3 +244,10 @@ function GotoChat() {
     $("body").removeClass("calls-tab-open friends-tab-open profile-tab-open");
     $("body").addClass("chats-tab-open");
 }
+
+
+function GotoCalls() {
+    //e.preventDefault()
+    $("body").removeClass("chats-tab-open friends-tab-open profile-tab-open");
+    $("body").addClass("calls-tab-open");
+}

@@ -1,4 +1,5 @@
 ﻿using GemBox.Document;
+using GoogleMapsComponents.Maps;
 using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Redis.OM.Modeling;
@@ -12,6 +13,12 @@ using System.Runtime.CompilerServices;
 namespace Paguyuban.Models
 {
     #region helpers model
+    public class CallTypes
+    {
+        public const string Incoming = "incoming";
+        public const string Outgoing = "outgoing";
+        public const string Missed = "missed";
+    }
     public class ChatGroupTypes
     {
         public const string Public = "Public";
@@ -64,6 +71,12 @@ namespace Paguyuban.Models
                     return FileTypes.Other;
             }
         }
+    }
+
+    public class CallItem{
+        public string Username { get; set; }
+        public UserProfile ToUser { get; set; } = new();
+        public List<CallLog> Datas { get; set; } = new();
     }
 
     public class AddContactCls
@@ -244,7 +257,28 @@ namespace Paguyuban.Models
     }
     //public enum AttachmentTypes { Doc, Video, Audio, Link, Location };
 
-    //[Table("contact")]
+    [Document(StorageType = StorageType.Json)]
+    public class CallLog
+    {
+
+        //[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        //[Key, Column(Order = 0)]
+        [RedisIdField][Indexed] public string Id { get; set; }
+        //[ForeignKey(nameof(User)), Column(Order = 0)]
+        [Indexed(Sortable = true)]
+        public string Username { set; get; }
+        [Indexed(Sortable = true)]
+        public string CallType { set; get; }
+        [Indexed(Sortable = true)]
+        public UserProfile FromUser { set; get; } = new();
+        [Indexed(Sortable = true)]
+        public UserProfile ToUser { set; get; } = new();
+        [Indexed(Sortable = true)]
+        public TimeSpan Duration { set; get; }
+        [Indexed(Sortable = true)]
+        public DateTime CallDate { set; get; }
+    }
+    
     [Document(StorageType = StorageType.Json)]
     public class Contact
     {

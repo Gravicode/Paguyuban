@@ -5,6 +5,7 @@
 @inject NavigationManager NavMgr
 @inject IToastService toastService
 @inject AppState AppState
+@inject CallLogService CallSvc
 
 <div class="friends px-0 py-2 p-xl-3">
     <div class="container-xl">
@@ -212,7 +213,11 @@
 @code {
     [Parameter]
     public Contact SelectedContact { get; set; }
+    UserProfile SelUser = new UserProfile();
 
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+    string UserName;
     async Task OpenChat()
     {
         if (string.IsNullOrEmpty(SelectedContact.User.Username))
@@ -229,8 +234,14 @@
 
     async Task Call()
     {
-        if (!string.IsNullOrEmpty(SelectedContact.Phone))
+        if (!string.IsNullOrEmpty(SelectedContact.Phone)){
+            var outgoing = new CallLog() { CallDate = DateHelper.GetLocalTimeNow(), CallType = CallTypes.Outgoing, Duration = new TimeSpan(0,1,1), FromUser = SelUser, ToUser = SelectedContact.User, Username = SelUser.Username  };
+            var incoming = new CallLog() { CallDate = DateHelper.GetLocalTimeNow(), CallType = CallTypes.Incoming, Duration = new TimeSpan(0, 1, 1), FromUser = SelUser, ToUser = SelectedContact.User, Username = SelectedContact.User.Username };
+            var res = CallSvc.InsertData(outgoing);
+            res = CallSvc.InsertData(incoming);
+
             await IJS.InvokeVoidAsync("CallNumber", SelectedContact.Phone);
+        }
         else
             toastService.ShowWarning("No phone number for this contact");
     }
@@ -242,5 +253,20 @@
             await IJS.InvokeVoidAsync("CloseMain");
             toastService.ShowInfo("Contact deleted.");
         }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = (await authenticationStateTask).User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            UserName = user.Identity.Name;
+            SelUser = UserSvc.GetItemByUsername(UserName);
+            
+        }
+
+
+
     }
 }
