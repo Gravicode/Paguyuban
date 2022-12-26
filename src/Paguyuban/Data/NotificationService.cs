@@ -10,6 +10,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using static System.Formats.Asn1.AsnWriter;
+using ServiceStack;
+
 namespace Paguyuban.Data
 {
     public class NotificationService : ICrud<Notification>
@@ -25,7 +27,11 @@ namespace Paguyuban.Data
             this.provider = provider;
             db = this.provider.RedisCollection<Notification>();
         }
-
+        public List<Notification> GetLatestNotifications(string username)
+        {
+            var data = db.Where(x => x.UserName == username).ToList();
+            return data.Where(x=>!x.IsRead).OrderByDescending(x => x.CreatedDate).ToList();
+        }
         public void RefreshEntity(Notification item)
         {
             try

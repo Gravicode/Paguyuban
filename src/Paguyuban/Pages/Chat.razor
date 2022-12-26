@@ -4,6 +4,7 @@
 @inject MessageBoxService MessageSvc
 @inject MessageDetailService ChatSvc
 @inject UserProfileService UserSvc
+@inject NotificationService NotificationSvc
 @inject ContactService ContactSvc
 @inject NavigationManager NavMgr
 @inject IToastService toastService
@@ -717,7 +718,31 @@
                                                                 </a>
                                                             </div>
                                                             
-                                                        </div>
+                                                            </div>
+                                                        }else if(item.Attachments.FileType == FileTypes.Location)
+                                                        {
+                                                            <div class="document">
+                                                                <div class="btn btn-primary btn-icon rounded-circle text-light mr-2">
+                                                                   
+                                                                    <!-- Alternate :: External File link -->
+                                                                    <img class="injectable hw-24" src="./../assets/media/heroicons/outline/globe.svg" alt=""> 
+                                                                </div>
+
+                                                                <div class="document-body">
+                                                                    <h6>
+                                                                        <a href="@item.Attachments.Url" class="text-reset" target="_blank" title="@item.Attachments.Title">Open Map</a>
+                                                                    </h6>
+
+                                                                    <ul class="list-inline small mb-0">
+                                                                        <li class="list-inline-item">
+                                                                            <span class="text-muted">@item.Attachments.Title</span>
+                                                                        </li>
+                                                                        <li class="list-inline-item">
+                                                                            <span class="text-muted text-uppercase">@item.Attachments.Desc</span>
+                                                                        </li>
+                                                                    </ul>
+                                                                </div>
+                                                            </div>
                                                         }
                                                         else
                                                         {
@@ -734,7 +759,7 @@
 
                                                                 <div class="document-body">
                                                                     <h6>
-                                                                        <a href="@item.Attachments.Url"  class="text-reset" title="@item.Attachments.Title">@item.Attachments.Desc</a>
+                                                                        <a href="@item.Attachments.Url" target="_blank" class="text-reset" title="@item.Attachments.Title">@item.Attachments.Desc</a>
                                                                     </h6>
 
                                                                     <ul class="list-inline small mb-0">
@@ -900,7 +925,7 @@
                                         <!-- <img class="injectable hw-20 mr-2" src="./../assets/media/heroicons/outline/user.svg" alt=""> -->
                                         <span>Contact</span>
                                     </a>
-                                    <a class="dropdown-item" href="#">
+                                    <a class="dropdown-item" href="#" @onclick="(() => PrepareForPick())" data-toggle="modal" data-target="#locationModal">
                                         <svg class="hw-20 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -1294,10 +1319,15 @@
     <SettingPage></SettingPage>
     <!-- Profile Settings End -->
     <ConfirmDialog OnClick="@Delete" />
-
+    
 </main>
+
+<PickLocation @ref="loc" DataChanged="@RefreshLocation">
+    <CustomHeader>Pilih Lokasi</CustomHeader>
+</PickLocation>
 <!-- Main End -->
 @code {
+    public PickLocation loc { get; set; }
     public List<ContactAlphabet> ListContact { set; get; } = new();
     public Contact SelectedContact { set; get; }
     string ContactKeyword;
@@ -1307,6 +1337,24 @@
     string CallKeyword;
     bool FirstLoad = true;
     public string SearchFilter { get; set; } = "All";
+    void PrepareForPick()
+    {
+        loc.Address = "";
+    }
+    private async void RefreshLocation()
+    {
+        var newAttachment = new MessageAttachment();
+        var lat = loc.SelectedLocation.Latitude.ToString();
+        var lng = loc.SelectedLocation.Longitude.ToString();
+        newAttachment.Title = "Share location";
+        newAttachment.Desc = $"Share location {loc.Address}: {lat},{lng}";
+        newAttachment.FileType = FileTypes.Location;
+        newAttachment.CreatedDate = DateHelper.GetLocalTimeNow();
+        newAttachment.Url = $"https://maps.google.com/?q={lat},{lng}";
+        await SendMessage(newAttachment);
+     
+      
+    }
     string GetStyle(Inbox item)
     {
         var BoxStyle = item.Message.IsGroup ? "groups" : "friends";
@@ -1412,6 +1460,12 @@
 
 
                 res = MessageSvc.InsertData(NewMsg);
+                if (res)
+                {
+                    //add notif
+                    var newNotif = new Notification() { Action = NotificationActions.NewMessage, CreatedDate = DateHelper.GetLocalTimeNow(), IsRead = false, LinkDesc = "-", LinkUrl = "-", Message = $" is send you a new message", User = SelUser, UserName = ToUser.Username };
+                    var res2 = NotificationSvc.InsertData(newNotif);
+                }
             }
             var NewMsg2 = MessageSvc.GetInboxByFromAndTo(tousername, SelUser.Username);
             if (NewMsg2 == null)
@@ -1861,6 +1915,10 @@
     {
         if (CurrentMessage != null)
             ReloadJs();
+        if (firstRender && FilteredMessages.Count > 0)
+        {
+            IJS.InvokeVoidAsync("ChatScrollToEnd");
+        }
     }
 
     private async Task UploadFiles(InputFileChangeEventArgs e)
@@ -1894,4 +1952,5 @@
     {
         await IJS.InvokeVoidAsync("OpenFileUpload", UploadId);
     }
+
 }

@@ -19,6 +19,13 @@ namespace Paguyuban.Models
         public bool Selected { get; set; }
         public Contact Contact { get; set; }
     }
+    public class NotificationActions
+    {
+        public const string AddToContact = "AddContact";
+        public const string NewGroupMessage = "NewGroupMessage";
+        public const string NewMessage = "NewMessage";
+        public const string ChangeProfilePic = "ChangeProfpic";
+    }
     public class CallTypes
     {
         public const string Incoming = "incoming";
@@ -432,7 +439,7 @@ namespace Paguyuban.Models
         public DateTime CreatedDate { set; get; }
         [Indexed(Sortable = true)]
         //[ForeignKey(nameof(User)), Column(Order = 0)]
-        public string UserId { set; get; }
+        public string UserName { set; get; }
         [Indexed(Sortable = true)]
         public UserProfile User { set; get; }
         [Indexed(Sortable = true)]

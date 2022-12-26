@@ -7,6 +7,8 @@
 @inject IToastService toastService
 @inject Blazored.LocalStorage.ILocalStorageService localStorage
 @inject UserProfileService service
+@inject NotificationService NotificationSvc
+@inject ContactService ContactSvc
 @inject IJSRuntime IJS
 @inject AppState AppState
 @implements IDisposable
@@ -362,6 +364,14 @@
 
         if (service.UpdateData(SelUser))
         {
+            //add notif
+            var contacts = ContactSvc.GetByUsername(SelUser.Username);
+            foreach(var contact in contacts)
+            {
+                //add notif
+                var newNotif = new Notification() { Action = NotificationActions.ChangeProfilePic, CreatedDate = DateHelper.GetLocalTimeNow(), IsRead = false, LinkDesc = "-", LinkUrl = "-", Message = $" is changed his/her profile picture", User = SelUser, UserName = contact.User.Username };
+                var res2 = NotificationSvc.InsertData(newNotif);
+            }
             toastService.ShowSuccess("Gambar profile Anda sudah berhasil di update. Nuhun", "Info");
         }
     }

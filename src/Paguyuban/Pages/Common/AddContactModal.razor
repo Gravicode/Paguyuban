@@ -3,6 +3,7 @@
 @inject IToastService toastService
 @inject UserProfileService UserSvc
 @inject ContactService ContactSvc
+@inject NotificationService NotificationSvc
 @inject AppState AppState
 
 <div class="modal modal-lg-fullscreen fade" id="addContact" tabindex="-1" role="dialog" aria-labelledby="addContactLabel" aria-hidden="true">
@@ -129,7 +130,10 @@
                 var newItem = new Contact() { Address = item.User.Address, BirthDate = item.User.BirthDate, Email = item.User.Email, Facebook = item.User.Facebook, FullName = item.User.FullName, Instagram = item.User.Instagram, LinkedIn = item.User.LinkedIn, Phone = item.User.Phone, Twitter = item.User.Twitter, Username = SelUser.Username, Website = item.User.Website, User = item.User };
                 var res = ContactSvc.InsertData(newItem);
                 if (res)
-                {
+                { 
+                    //add notif
+                    var newNotif = new Notification() { Action = NotificationActions.AddToContact, CreatedDate = DateHelper.GetLocalTimeNow(), IsRead = false, LinkDesc = "-", LinkUrl = "-", Message = $" is add you to his contact", User = SelUser, UserName = item.User.Username };
+                    var res2 = NotificationSvc.InsertData(newNotif);
                     count++;
                 }
             }
@@ -139,7 +143,10 @@
                 LoadContacts();
                 Search();
                 AppState.RefreshContact(SelUser.Username);
+
+               
             }
+            
             //IJS.InvokeVoidAsync("CloseModal", "addContact");
         }
 

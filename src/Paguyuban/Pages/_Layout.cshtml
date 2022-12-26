@@ -48,7 +48,8 @@
 <body class="@(IsNoAuth ? "authentication-page":"chats-tab-open")">
     
     @RenderBody()
-   
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDpqcgMnKf1TnQPRQKNmlnUgqh_EI0t_Iw&v=3"></script>
+    <script src="_content/BlazorGoogleMaps/objectManager.js"></script>
     <script src="assets/vendors/jquery/jquery-3.5.0.min.js"></script>
     <script src="assets/vendors/bootstrap/bootstrap.bundle.min.js"></script>
     <script src="assets/vendors/magnific-popup/jquery.magnific-popup.min.js"></script>
@@ -137,6 +138,34 @@
                 block: 'end',               // "start" | "center" | "end" | "nearest",
                 behavior: 'auto'          //"auto"  | "instant" | "smooth",
             });
+        }
+         //gps location
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.watchPosition(showPosition);
+                return "Success";
+            } else {
+                return "Geolocation is not supported by this browser.";
+            }
+        }
+        function showPosition(position) {
+            console.log("Latitude: " + position.coords.latitude +
+                ", Longitude: " + position.coords.longitude);
+            DotNet.invokeMethodAsync('Dinding', 'UpdateLocationCaller', position.coords.latitude, position.coords.longitude);
+        }
+        function CopyToClipboard(elementid) {
+            // Get the text field
+            var copyText = document.getElementById(elementid);
+
+            // Select the text field
+            copyText.select();
+            copyText.setSelectionRange(0, 99999); // For mobile devices
+
+            // Copy the text inside the text field
+            navigator.clipboard.writeText(copyText.value);
+
+            // Alert the copied text
+            //alert("Copied the text: " + copyText.value);
         }
     </script>
 

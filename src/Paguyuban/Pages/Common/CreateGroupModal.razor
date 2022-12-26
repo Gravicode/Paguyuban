@@ -1,5 +1,6 @@
 ﻿@inject UserProfileService UserSvc
 @inject MessageBoxService MessageSvc
+@inject NotificationService NotificationSvc
 @inject ContactService ContactSvc
 @inject IJSRuntime IJS
 @inject IToastService toastService
@@ -335,17 +336,21 @@
             NewMsg.CreatedDate = now;
             NewMsg.IsArchived = false;
             NewMsg.IsBlocked = false;
-        
+
             NewMsg.Uid = UID;
 
 
             res = MessageSvc.InsertData(NewMsg);
+            var newNotif = new Notification() { Action = NotificationActions.NewGroupMessage, CreatedDate = DateHelper.GetLocalTimeNow(), IsRead = false, LinkDesc = "-", LinkUrl="-", Message = $" is add you to new group [{NewMessage.Title}]", User = SelUser, UserName = uname };
+            var res2 = NotificationSvc.InsertData(newNotif);
             if (res) count++;
             //xxx
         }
 
         if (count > 0)
         {
+            
+
             AppState.RefreshMessageBox(SelUser.Username);
             await IJS.InvokeVoidAsync("CloseModal", "createGroup");
         }
