@@ -1,4 +1,12 @@
-﻿<div class="modal modal-lg-fullscreen fade" id="createGroup" tabindex="-1" role="dialog" aria-labelledby="createGroupLabel" aria-hidden="true">
+﻿@inject UserProfileService UserSvc
+@inject MessageBoxService MessageSvc
+@inject ContactService ContactSvc
+@inject IJSRuntime IJS
+@inject IToastService toastService
+@inject AppState AppState
+@inject AzureBlobHelper AzureBlobHelper
+@implements IDisposable
+<div class="modal modal-lg-fullscreen fade" id="createGroup" tabindex="-1" role="dialog" aria-labelledby="createGroupLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-dialog-zoom">
         <div class="modal-content">
             <div class="modal-header">
@@ -13,15 +21,17 @@
                     <div class="col-12">
                         <div class="form-group">
                             <label for="groupName">Group name</label>
-                            <input type="text" class="form-control form-control-md" id="groupName" placeholder="Type group name here">
+                            <input type="text" @bind="NewMessage.Title" class="form-control form-control-md" id="groupName" placeholder="Type group name here">
                         </div>
                     </div>
                     <div class="col-12">
                         <div class="form-group">
                             <label>Choose profile picture</label>
                             <div class="custom-file">
-                                <input type="file" class="custom-file-input" id="profilePictureInput" accept="image/*">
-                                <label class="custom-file-label" for="profilePictureInput">Choose file</label>
+
+                                <InputFile id="fileInputGroup" OnChange="UploadFiles" accept="image/*" class="custom-file-input" />
+                                <label @onclick="(()=>PrepareUpload())" class="custom-file-label" for="profilePictureInput">Choose file</label>
+                                <p>@(!string.IsNullOrEmpty(NewMessage.PicGroupUrl) ? "picture is selected" : "please upload a picture")</p>
                             </div>
                         </div>
                     </div>
@@ -36,7 +46,7 @@
                             <div class="col">
                                 <div class="form-group rounded p-2 border">
                                     <div class="custom-control custom-radio">
-                                        <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios1" value="option1" checked>
+                                        <input class="form-check-input" type="radio" @onclick="()=>SelectGroup(ChatGroupTypes.Public)" name="exampleRadios" id="exampleRadios1" value="option1" checked>
                                         <label class="form-check-label" for="exampleRadios1">
                                             Public group
                                         </label>
@@ -46,7 +56,7 @@
                             <div class="col">
                                 <div class="form-group rounded p-2 border">
                                     <div class="custom-control custom-radio">
-                                        <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios2" value="option2">
+                                        <input class="form-check-input" type="radio" @onclick="()=>SelectGroup(ChatGroupTypes.Private)" name="exampleRadios" id="exampleRadios2" value="option2">
                                         <label class="form-check-label" for="exampleRadios2">
                                             Private group
                                         </label>
@@ -63,9 +73,9 @@
                         <!-- Search Start -->
                         <form class="form-inline w-100 px-2 pb-2 border-bottom">
                             <div class="input-group w-100 bg-light">
-                                <input type="text" class="form-control form-control-md search border-right-0 transparent-bg pr-0" placeholder="Search">
+                                <input type="text" @onkeyup="KeyUp" @bind="Keyword" class="form-control form-control-md search border-right-0 transparent-bg pr-0" placeholder="Search">
                                 <div class="input-group-append">
-                                    <div class="input-group-text transparent-bg border-left-0" role="button">
+                                    <div @onclick="Search" class="input-group-text transparent-bg border-left-0" role="button">
                                         <!-- Default :: Inline SVG -->
                                         <svg class="hw-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -83,122 +93,33 @@
                     <div class="col-12 px-0">
                         <!-- List Group Start -->
                         <ul class="list-group list-group-flush">
+                            <Virtualize Items="@ListContact" Context="item">
+                                <!-- List Group Item Start -->
+                                <li @key="item.Contact.Id" class="list-group-item">
+                                    <div class="media">
+                                        <div class="avatar @(item.Contact.User.Aktif? "avatar-online" : "avatar-away") mr-2">
+                                            <img src="@(string.IsNullOrEmpty(item.Contact.User?.PicUrl)? "./../assets/media/avatar/1.png": item.Contact.User.PicUrl)" alt="">
+                                        </div>
 
-                            <!-- List Group Item Start -->
-                            <li class="list-group-item">
-                                <div class="media">
-                                    <div class="avatar avatar-online mr-2">
-                                        <img src="./../assets/media/avatar/1.png" alt="">
-                                    </div>
+                                        <div class="media-body">
+                                            <h6 class="text-truncate">
+                                                <a @onclick:preventDefault @onclick="()=>SelectContact(item)" href="#" class="text-reset">@item.Contact.FullName</a>
+                                            </h6>
 
-                                    <div class="media-body">
-                                        <h6 class="text-truncate">
-                                            <a href="#" class="text-reset">Catherine Richardson</a>
-                                        </h6>
+                                            <p class="text-muted mb-0">@(item.Contact.User.Aktif ? "Online" : "Offline")</p>
+                                        </div>
 
-                                        <p class="text-muted mb-0">Online</p>
-                                    </div>
-
-                                    <div class="media-options">
-                                        <div class="custom-control custom-checkbox">
-                                            <input class="custom-control-input" type="checkbox" value="" id="chx-user-1" checked="">
-                                            <label class="custom-control-label" for="chx-user-1"></label>
+                                        <div class="media-options">
+                                            <div class="custom-control custom-checkbox">
+                                                <input class="custom-control-input" type="checkbox" id='@($"chx-user-{item.Index}")' @bind="item.Selected">
+                                                <label class="custom-control-label" for='@($"chx-user-{item.Index}")'></label>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <label class="media-label" for="chx-user-1"></label>
-                            </li>
-                            <!-- List Group Item End -->
-                            <!-- List Group Item Start -->
-                            <li class="list-group-item">
-                                <div class="media">
-                                    <div class="avatar avatar-online mr-2">
-                                        <img src="./../assets/media/avatar/2.png" alt="">
-                                    </div>
-
-                                    <div class="media-body">
-                                        <h6 class="text-truncate">
-                                            <a href="#" class="text-reset">Katherine Schneider</a>
-                                        </h6>
-
-                                        <p class="text-muted mb-0">Online</p>
-                                    </div>
-
-                                    <div class="media-options">
-                                        <div class="custom-control custom-checkbox">
-                                            <input class="custom-control-input" type="checkbox" value="" id="chx-user-2" checked="">
-                                            <label class="custom-control-label" for="chx-user-2"></label>
-                                        </div>
-                                    </div>
-                                </div>
-                                <label class="media-label" for="chx-user-2"></label>
-                            </li>
-                            <!-- List Group Item End -->
-                            <!-- List Group Item Start -->
-                            <li class="list-group-item">
-                                <div class="media">
-                                    <div class="avatar avatar-offline mr-2">
-                                        <img src="./../assets/media/avatar/3.png" alt="">
-                                    </div>
-
-                                    <div class="media-body">
-                                        <h6 class="text-truncate">
-                                            <a href="#" class="text-reset">Brittany K. Williams</a>
-                                        </h6>
-
-                                        <p class="text-muted mb-0">Offline</p>
-                                    </div>
-                                    <div class="media-options">
-                                        <div class="custom-control custom-checkbox">
-                                            <input class="custom-control-input" type="checkbox" value="" id="chx-user-3">
-                                            <label class="custom-control-label" for="chx-user-3"></label>
-                                        </div>
-                                    </div>
-                                </div>
-                                <label class="media-label" for="chx-user-3"></label>
-                            </li>
-                            <!-- List Group Item End -->
-                            <!-- List Group Item Start -->
-                            <li class="list-group-item">
-                                <div class="media">
-                                    <div class="avatar avatar-busy mr-2">
-                                        <img src="./../assets/media/avatar/4.png" alt="">
-                                    </div>
-                                    <div class="media-body">
-                                        <h6 class="text-truncate"><a href="#" class="text-reset">Christina Turner</a></h6>
-                                        <p class="text-muted mb-0">Busy</p>
-                                    </div>
-                                    <div class="media-options">
-                                        <div class="custom-control custom-checkbox">
-                                            <input class="custom-control-input" type="checkbox" value="" id="chx-user-4" checked="">
-                                            <label class="custom-control-label" for="chx-user-4"></label>
-                                        </div>
-                                    </div>
-                                </div>
-                                <label class="media-label" for="chx-user-4"></label>
-                            </li>
-                            <!-- List Group Item End -->
-                            <!-- List Group Item Start -->
-                            <li class="list-group-item">
-                                <div class="media">
-                                    <div class="avatar avatar-away mr-2">
-                                        <img src="./../assets/media/avatar/5.png" alt="">
-                                    </div>
-
-                                    <div class="media-body">
-                                        <h6 class="text-truncate"><a href="#" class="text-reset">Annie Richardson</a></h6>
-                                        <p class="text-muted mb-0">Away</p>
-                                    </div>
-                                    <div class="media-options">
-                                        <div class="custom-control custom-checkbox">
-                                            <input class="custom-control-input" type="checkbox" value="" id="chx-user-5">
-                                            <label class="custom-control-label" for="chx-user-5"></label>
-                                        </div>
-                                    </div>
-                                </div>
-                                <label class="media-label" for="chx-user-5"></label>
-                            </li>
-                            <!-- List Group Item End -->
+                                    <label class="media-label" for='@($"chx-user-{item.Index}")'></label>
+                                </li>
+                                <!-- List Group Item End -->
+                            </Virtualize>
 
                         </ul>
                         <!-- List Group End -->
@@ -218,19 +139,223 @@
                                 <!-- <img class="injectable hw-24" src="./../assets/media/heroicons/outline/check.svg" alt=""> -->
                             </div>
                             <h6>Group Created Successfully</h6>
-                            <p class="text-muted text-center">Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolores cumque laborum fugiat vero pariatur provident!</p>
+                            <p class="text-muted text-center">Click finish to start chat in group!</p>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-link text-muted js-btn-step mr-auto" data-orientation="cancel" data-dismiss="modal"></button>
-                <button type="button" class="btn btn-secondary  js-btn-step" data-orientation="previous"></button>
-                <button type="button" class="btn btn-primary js-btn-step" data-orientation="next"></button>
+                <button type="button" @onclick="Prev" class="btn btn-secondary  js-btn-step" data-orientation="previous"></button>
+                <button type="button" @onclick="Next" class="btn btn-primary js-btn-step" data-orientation="next"></button>
             </div>
         </div>
     </div>
 </div>
 @code {
+    int Step = 0;
+    [Parameter]
+    public MessageBox NewMessage { get; set; } = new();
+    string Keyword;
+    [Parameter]
+    //public List<Contact> ListContact { get; set; } = new();
+    public List<SelectContact> ListContact { get; set; } = new();
 
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+    string UserName;
+    UserProfile SelUser;
+    async Task PrepareUpload()
+    {
+        await IJS.InvokeVoidAsync("OpenFileUpload", "fileInputGroup");
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        var user = (await authenticationStateTask).User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            UserName = user.Identity.Name;
+            SelUser = UserSvc.GetItemByUsername(UserName);
+            Search();
+        }
+        AppState.OnContactAdded += Refresh;
+        Step = 0;
+    }
+    async Task KeyUp(KeyboardEventArgs e)
+    {
+
+        if (e.Key == "Enter")
+        {
+            Search();
+        }
+    }
+    async void Refresh(string username)
+    {
+        if (SelUser.Username == username)
+        {
+            Search();
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+    public void Dispose()
+    {
+        AppState.OnContactAdded -= Refresh;
+    }
+    void Search()
+    {
+        //if (string.IsNullOrEmpty(Keyword))
+        //{
+        //    toastService.ShowWarning("Silakan isi keyword dulu.");
+        //    return;
+        //}
+        if (ListContact == null)
+            ListContact = new();
+        else
+            ListContact.Clear();
+        var datas = ContactSvc.FindByKeyword(Keyword, SelUser.Username);
+        var count = 1;
+        datas.ForEach(x =>
+        {
+            ListContact.Add(new SelectContact() { Contact = x, Index=count++ });
+        });
+    }
+    async Task SelectContact(SelectContact item)
+    {
+        item.Selected = !item.Selected;
+        //if (item != null)
+        //{
+
+        //}
+
+    }
+    private async Task UploadFiles(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file != null)
+        {
+            var ms = new MemoryStream();
+            await file.OpenReadStream().CopyToAsync(ms);
+            var bytes = SKiaImageHelper.FixedSize(ms, 250, 250, false);
+            string newName = string.Empty;
+            var gid = Guid.NewGuid().ToString().Replace("-", "");
+            newName = $"group_{gid}_pic{Path.GetExtension(file.Name)}";
+            var FileUrl = $"{AppConstants.UploadUrlPrefix}{newName}";
+            await AzureBlobHelper.UploadFile(newName, bytes);
+            NewMessage.PicGroupUrl = FileUrl;
+
+        }
+    }
+
+    public void Reset()
+    {
+        Step = 0;
+    }
+
+    async Task Prev()
+    {
+        if (Step > 0) Step--;
+    }
+
+    async Task Next()
+    {
+        if (Step < 2)
+            Step++;
+        else
+        {
+            //save
+            await Save();
+        }
+    }
+    string ErrorMsg;
+    async Task Save()
+    {
+        ErrorMsg = "";
+
+
+        if (string.IsNullOrEmpty(NewMessage.Title))
+        {
+            ErrorMsg += "please fill group name. ";
+
+        }
+        if (string.IsNullOrEmpty(NewMessage.GroupType))
+        {
+            ErrorMsg += "please select group type. ";
+
+        }
+        if (string.IsNullOrEmpty(NewMessage.PicGroupUrl))
+        {
+            ErrorMsg += "please upload group image. ";
+
+        }
+        if (!ListContact.Any(x => x.Selected))
+        {
+            ErrorMsg += "please select at least add 1 member in group. ";
+        }
+
+        if (ErrorMsg.Length > 0)
+        {
+            toastService.ShowWarning(ErrorMsg, "Perhatian");
+            return;
+        }
+
+        var selectedUsers = ListContact.Where(x => x.Selected).Select(x => x.Contact).ToList();
+        var MyContact = ContactSvc.GetByUsername(SelUser.Username);
+
+        var selectedUsersArr = selectedUsers.Select(x => x.User.Username).ToList();
+        //add my self as member
+        selectedUsersArr.Add(SelUser.Username);
+
+        NewMessage.IsGroup = true;
+        NewMessage.GroupMembers = selectedUsersArr.ToArray();
+        string UID = Guid.NewGuid().ToString();
+        var count = 0;
+        foreach (var uname in selectedUsersArr)
+        {
+            var NewMsg = new MessageBox();
+            NewMsg.IsGroup = true;
+            NewMsg.GroupMembers = NewMessage.GroupMembers;
+            NewMsg.PicGroupUrl = NewMessage.PicGroupUrl;
+            NewMsg.GroupType = NewMessage.GroupType;
+            NewMsg.Title = NewMessage.Title;
+
+            bool res;
+            var now = DateHelper.GetLocalTimeNow();
+            var ToUser = selectedUsers.First();
+            //add inbox for myself
+
+            NewMsg.LastMessage = "";
+            NewMsg.LastUpdate = now;
+            NewMsg.IsRead = false;
+            NewMsg.UserId = "";
+            NewMsg.ToUserId = ToUser.Id;
+            NewMsg.ToUsername = ToUser.Username;
+            NewMsg.Username = uname;
+            NewMsg.IsMuted = false;
+            NewMsg.CreatedDate = now;
+            NewMsg.IsArchived = false;
+            NewMsg.IsBlocked = false;
+        
+            NewMsg.Uid = UID;
+
+
+            res = MessageSvc.InsertData(NewMsg);
+            if (res) count++;
+            //xxx
+        }
+
+        if (count > 0)
+        {
+            AppState.RefreshMessageBox(SelUser.Username);
+            await IJS.InvokeVoidAsync("CloseModal", "createGroup");
+        }
+
+
+
+    }
+
+    async Task SelectGroup(string Tipe)
+    {
+        NewMessage.GroupType = Tipe;
+    }
 }

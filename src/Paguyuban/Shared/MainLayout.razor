@@ -28,7 +28,7 @@
         <StartConversationModal></StartConversationModal>
 
         <!-- Modal 2 :: Create Group -->
-        <CreateGroupModal></CreateGroupModal>
+        <CreateGroupModal @ref="GroupModal" NewMessage="NewGroupMessage"></CreateGroupModal>
 
         <!-- Modal 3 :: Invite Others -->
         <InviteOtherModal></InviteOtherModal>
@@ -61,9 +61,12 @@
 
 
 @code {
+
+    public CreateGroupModal GroupModal { get; set; }
+
     [Parameter]
     public Note NewNote { get; set; } = new();
-    
+
     [Parameter]
     public Todo NewTodo { get; set; } = new();
 
@@ -74,10 +77,10 @@
     public bool IsTransparent { get; set; } = true;
 
     [Parameter]
-     public Inbox NewInbox { get; set; }
+    public Inbox NewInbox { get; set; }
 
     [Parameter]
-    public Inbox NewGroup { get; set; } 
+    public MessageBox NewGroupMessage { get; set; } = new();
 
     [CascadingParameter]
     private Task<AuthenticationState> authenticationStateTask { get; set; }
@@ -93,16 +96,17 @@
         NewNote = note;
         StateHasChanged();
     } 
-    
+
     public void SetNewInbox(Inbox box)
     {
         NewInbox = box;
         StateHasChanged();
     }
-    
-    public void SetNewGroup(Inbox box)
+
+    public void SetNewGroup()
     {
-        NewGroup = box;
+        NewGroupMessage = new();
+        GroupModal?.Reset();
         StateHasChanged();
     }
     

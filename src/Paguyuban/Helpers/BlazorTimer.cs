@@ -19,7 +19,7 @@ namespace Paguyuban.Helpers
 
         public event Action OnElapsed;
 
-        private void Dispose()
+        public void Dispose()
         {
             _timer.Stop();
             _timer.Dispose();

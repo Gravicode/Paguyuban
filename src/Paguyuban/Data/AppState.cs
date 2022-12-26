@@ -4,6 +4,7 @@
     {
 
         public event Action<string> OnProfileChange;
+        public event Action<string> OnMessageBoxChange;
         public event Action<string> OnChatChange;
         public event Action<string> OnNotesAdded;
         public event Action<string> OnTodosAdded;
@@ -37,8 +38,14 @@
         public void RefreshContact(string username)
         {
             ContactStateChanged(username);
+        }   
+        
+        public void RefreshMessageBox(string username)
+        {
+            MessageBoxStateChanged(username);
         }
 
+        private void MessageBoxStateChanged(string username) => OnMessageBoxChange?.Invoke(username);
         private void ContactStateChanged(string username) => OnContactAdded?.Invoke(username);
         private void MessageAdded(string username) => OnMessageBoxAdded?.Invoke(username);
         private void ProfileStateChanged(string username) => OnProfileChange?.Invoke(username);

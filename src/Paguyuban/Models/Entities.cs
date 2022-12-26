@@ -13,6 +13,12 @@ using System.Runtime.CompilerServices;
 namespace Paguyuban.Models
 {
     #region helpers model
+    public class SelectContact
+    {
+        public int Index { get; set; }
+        public bool Selected { get; set; }
+        public Contact Contact { get; set; }
+    }
     public class CallTypes
     {
         public const string Incoming = "incoming";
