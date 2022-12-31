@@ -25,6 +25,7 @@ namespace Paguyuban.Data
         public static string EmailAccount = "Paguyuban@gmail.com";
         public const string GemLic = "EDWG-SKFA-D7J1-LDQ5";
         public static string RedisCon { set; get; }
+        public static string RedisPassword{ set; get; }
 
         public static string GMapApiKey { get; set; }
         public static string BlobConn { get; set; }

@@ -14,6 +14,7 @@ using Paguyuban.Models;
 using Redis.OM;
 using Redis.OM.Searching;
 using Redis.OM.Skeleton.HostedServices;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
@@ -81,6 +82,7 @@ var proxies = AppConstants.ProxyIP.Split(';');
 AppConstants.UploadUrlPrefix = Configuration["UploadUrlPrefix"];
 AppConstants.SQLConn = Configuration["ConnectionStrings:SqlConn"];
 AppConstants.RedisCon = Configuration["RedisCon"];
+AppConstants.RedisPassword = Configuration["RedisPassword"];
 AppConstants.BlobConn = Configuration["ConnectionStrings:BlobConn"];
 AppConstants.GMapApiKey = Configuration["GmapKey"];
 builder.Services.AddBlazoredLocalStorage();
@@ -109,8 +111,16 @@ setting.Bucket = AppConstants.StorageBucket;
 setting.SecretKey = AppConstants.StorageSecret;
 setting.AccessKey = AppConstants.StorageAccess;
 
+var options = ConfigurationOptions.Parse(AppConstants.RedisCon); // host1:port1, host2:port2, ...
+if (!string.IsNullOrEmpty(AppConstants.RedisPassword))
+{
+   
+    options.Password = AppConstants.RedisPassword;
 
-builder.Services.AddSingleton(new RedisConnectionProvider(AppConstants.RedisCon));
+} 
+    builder.Services.AddSingleton(new RedisConnectionProvider(options));
+
+
 var idx = new IndexCreationService();
 await idx.CreateIndex();
 builder.Services.AddSingleton(idx);
