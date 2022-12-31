@@ -69,20 +69,20 @@ IConfiguration Configuration = configBuilder.Build();
 AppConstants.ProxyIP = Configuration["ProxyIP"];
 
 var proxies = AppConstants.ProxyIP.Split(';');
-    builder.Services.Configure<ForwardedHeadersOptions>(options =>
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    foreach (var proxy in proxies)
     {
-        foreach (var proxy in proxies)
-        {
-            options.KnownProxies.Add(IPAddress.Parse(proxy));
-        }
-    });
+        options.KnownProxies.Add(IPAddress.Parse(proxy));
+    }
+});
 
 
 
 AppConstants.UploadUrlPrefix = Configuration["UploadUrlPrefix"];
 AppConstants.SQLConn = Configuration["ConnectionStrings:SqlConn"];
-AppConstants.RedisCon = Configuration["RedisCon"];
-AppConstants.RedisPassword = Configuration["RedisPassword"];
+AppConstants.RedisCon = Configuration["ConnectionStrings:RedisCon"];
+AppConstants.RedisPassword = Configuration["ConnectionStrings:RedisPassword"];
 AppConstants.BlobConn = Configuration["ConnectionStrings:BlobConn"];
 AppConstants.GMapApiKey = Configuration["GmapKey"];
 builder.Services.AddBlazoredLocalStorage();
@@ -114,11 +114,11 @@ setting.AccessKey = AppConstants.StorageAccess;
 var options = ConfigurationOptions.Parse(AppConstants.RedisCon); // host1:port1, host2:port2, ...
 if (!string.IsNullOrEmpty(AppConstants.RedisPassword))
 {
-   
+
     options.Password = AppConstants.RedisPassword;
 
-} 
-    builder.Services.AddSingleton(new RedisConnectionProvider(options));
+}
+builder.Services.AddSingleton(new RedisConnectionProvider(options));
 
 
 var idx = new IndexCreationService();
