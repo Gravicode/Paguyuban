@@ -118,9 +118,8 @@ if (!string.IsNullOrEmpty(AppConstants.RedisPassword))
     options.Password = AppConstants.RedisPassword;
 
 }
+
 builder.Services.AddSingleton(new RedisConnectionProvider(options));
-
-
 var idx = new IndexCreationService();
 await idx.CreateIndex();
 builder.Services.AddSingleton(idx);

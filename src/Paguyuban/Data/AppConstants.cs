@@ -7,6 +7,7 @@ namespace Paguyuban.Data
 {
     public class AppConstants
     {
+        public static long MaxAllowedFileSize = 10 * 1024000;
         public static string StorageEndpoint = "";
         public static string StorageAccess = "";
         public static string StorageSecret = "";
